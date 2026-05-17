@@ -81,6 +81,11 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#f4f2ef;color:#1a
   <div class="content">
     <div class="section-title">النماذج المتاحة</div>
     <div class="section-sub">اختر نموذجاً لملء بياناته وطباعته</div>
+    <div style="margin-bottom:16px;position:relative">
+      <input type="text" id="search-inp" placeholder="🔍  ابحث عن نموذج..." oninput="filterTemplates(this.value)"
+        style="width:100%;max-width:400px;padding:10px 14px;border:1px solid #e5e7eb;border-radius:10px;font-size:14px;font-family:inherit;background:white;direction:rtl;outline:none;transition:border-color .15s"
+        onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#e5e7eb'">
+    </div>
     <div id="templates-grid" class="templates-grid">
       <div class="loading"><div class="spinner"></div> جاري التحميل...</div>
     </div>
@@ -130,10 +135,35 @@ pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/p
 let sb = null;
 let pdf=null, page=1, pages=1, imgW=0, imgH=0;
 let fields=[];
+let allTemplates=[];
 
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
   document.getElementById(id).classList.add('on');
+}
+
+function filterTemplates(q){
+  const filtered = q.trim()
+    ? allTemplates.filter(t=>t.name.includes(q.trim()))
+    : allTemplates;
+  renderGrid(filtered, q.trim());
+}
+
+function renderGrid(data, q=''){
+  const grid=document.getElementById('templates-grid');
+  if(!data.length){
+    grid.innerHTML=`<div class="empty-state"><div class="icon">🔍</div><p>${q?'لا توجد نماذج بهذا الاسم':'لا توجد نماذج متاحة بعد'}</p></div>`;
+    return;
+  }
+  grid.innerHTML=data.map(t=>`
+    <div class="tpl-card" onclick="openTemplate('${t.id}')">
+      <div class="tpl-thumb">📄</div>
+      <div class="tpl-info">
+        <div class="tpl-name">${t.name}</div>
+        <div class="tpl-meta">${new Date(t.created_at).toLocaleDateString('ar-SA')}</div>
+        <button class="tbtn pr" style="width:100%;justify-content:center;margin-top:6px">فتح وملء ←</button>
+      </div>
+    </div>`).join('');
 }
 
 // ══ Init ══
@@ -146,22 +176,16 @@ window.addEventListener('load', async ()=>{
 
 // ══ Templates ══
 async function loadTemplates(){
-  const grid = document.getElementById('templates-grid');
-  grid.innerHTML = '<div class="loading"><div class="spinner"></div> جاري التحميل...</div>';
-  const {data, error} = await sb.from('templates').select('*').order('created_at',{ascending:false});
-  if(error || !data?.length){
-    grid.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>لا توجد نماذج متاحة بعد</p></div>';
+  const grid=document.getElementById('templates-grid');
+  grid.innerHTML='<div class="loading"><div class="spinner"></div> جاري التحميل...</div>';
+  const {data,error}=await sb.from('templates').select('*').order('created_at',{ascending:false});
+  if(error||!data?.length){
+    allTemplates=[];
+    grid.innerHTML='<div class="empty-state"><div class="icon">📭</div><p>لا توجد نماذج متاحة بعد</p></div>';
     return;
   }
-  grid.innerHTML = data.map(t=>`
-    <div class="tpl-card" onclick="openTemplate('${t.id}')">
-      <div class="tpl-thumb">📄</div>
-      <div class="tpl-info">
-        <div class="tpl-name">${t.name}</div>
-        <div class="tpl-meta">${new Date(t.created_at).toLocaleDateString('ar-SA')}</div>
-        <button class="tbtn pr" style="width:100%;justify-content:center">فتح وملء ←</button>
-      </div>
-    </div>`).join('');
+  allTemplates=data;
+  renderGrid(data);
 }
 
 async function openTemplate(id){
