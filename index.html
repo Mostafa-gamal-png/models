@@ -3,180 +3,81 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>نظام النماذج الذكي</title>
+<title>نماذج الشركة</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#f4f2ef;color:#1a1a1a;direction:rtl}
-.screen{display:none;min-height:100vh}
-.screen.on{display:flex;flex-direction:column}
-
-/* ── Setup ── */
-#sc-setup{align-items:center;justify-content:center;background:linear-gradient(135deg,#1e3a5f,#2563eb)}
-.setup-card{background:white;border-radius:16px;padding:32px;width:440px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
-.setup-logo{text-align:center;margin-bottom:24px}
-.setup-logo h1{font-size:22px;font-weight:700;color:#111}
-.setup-logo p{font-size:13px;color:#6b7280;margin-top:4px}
-.inp-row{margin-bottom:14px}
-.inp-lbl{font-size:12px;font-weight:600;color:#374151;margin-bottom:5px;display:block}
-.inp{width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;font-family:inherit;direction:ltr}
-.inp:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.12)}
-.btn{padding:10px 20px;border-radius:8px;border:none;cursor:pointer;font-size:14px;font-family:inherit;font-weight:500;transition:all .15s}
-.btn-pr{background:#2563eb;color:white;width:100%}.btn-pr:hover{background:#1d4ed8}
-.hint{font-size:11px;color:#9ca3af;margin-top:6px;line-height:1.5}
-.divider{border:none;border-top:1px solid #e5e7eb;margin:18px 0}
-
-/* ── Topbar ── */
+.screen{display:none;min-height:100vh}.screen.on{display:flex;flex-direction:column}
 .topbar{background:white;border-bottom:1px solid #e5e7eb;padding:0 20px;display:flex;align-items:center;height:54px;gap:10px;flex-shrink:0;position:sticky;top:0;z-index:100}
 .topbar-logo{font-size:15px;font-weight:700;color:#111;flex:1}
 .topbar-logo span{color:#2563eb}
 .tbtn{padding:7px 14px;border-radius:7px;border:1px solid #e5e7eb;background:white;cursor:pointer;font-size:13px;font-family:inherit;display:inline-flex;align-items:center;gap:5px;transition:all .15s;color:#374151;white-space:nowrap}
 .tbtn:hover{background:#f3f4f6}
-.tbtn.pr{background:#2563eb;color:white;border-color:#2563eb}
-.tbtn.pr:hover{background:#1d4ed8}
-.tbtn.gr{background:#059669;color:white;border-color:#059669}
-.tbtn.gr:hover{background:#047857}
-.tbtn.red{background:#dc2626;color:white;border-color:#dc2626}
+.tbtn.gr{background:#059669;color:white;border-color:#059669}.tbtn.gr:hover{background:#047857}
+.tbtn.pr{background:#2563eb;color:white;border-color:#2563eb}.tbtn.pr:hover{background:#1d4ed8}
 .sep{width:1px;height:26px;background:#e5e7eb;margin:0 3px;flex-shrink:0}
-.badge-admin{background:#fef3c7;color:#92400e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
-
-/* ── Home ── */
-#sc-home .content{flex:1;padding:28px 24px}
+.content{flex:1;padding:28px 24px}
 .section-title{font-size:18px;font-weight:700;color:#111;margin-bottom:6px}
 .section-sub{font-size:13px;color:#6b7280;margin-bottom:20px}
 .templates-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
-.tpl-card{background:white;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;cursor:pointer;transition:all .18s;display:flex;flex-direction:column}
+.tpl-card{background:white;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;cursor:pointer;transition:all .18s}
 .tpl-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.1);transform:translateY(-2px);border-color:#3b82f6}
-.tpl-thumb{height:140px;background:linear-gradient(135deg,#dbeafe,#eff6ff);display:flex;align-items:center;justify-content:center;font-size:48px;position:relative;overflow:hidden}
-.tpl-thumb img{width:100%;height:100%;object-fit:cover;object-position:top}
+.tpl-thumb{height:130px;background:linear-gradient(135deg,#dbeafe,#eff6ff);display:flex;align-items:center;justify-content:center;font-size:44px}
 .tpl-info{padding:12px}
 .tpl-name{font-size:14px;font-weight:600;color:#111;margin-bottom:4px}
-.tpl-meta{font-size:11px;color:#9ca3af}
-.tpl-actions{display:flex;gap:6px;margin-top:10px}
-.tpl-btn{flex:1;padding:7px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-family:inherit;font-weight:500}
-.tpl-btn-open{background:#eff6ff;color:#1d4ed8}
-.tpl-btn-del{background:#fef2f2;color:#dc2626}
-.empty-state{text-align:center;padding:60px 20px;color:#9ca3af}
-.empty-state .icon{font-size:48px;margin-bottom:12px}
-.empty-state p{font-size:14px}
+.tpl-meta{font-size:11px;color:#9ca3af;margin-bottom:10px}
 .loading{display:flex;align-items:center;justify-content:center;padding:60px;gap:10px;color:#6b7280;font-size:14px}
 .spinner{width:20px;height:20px;border:2px solid #e5e7eb;border-top-color:#3b82f6;border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* ── Editor ── */
+.empty-state{text-align:center;padding:60px 20px;color:#9ca3af}
+.empty-state .icon{font-size:48px;margin-bottom:12px}
 #sc-editor{height:100vh;overflow:hidden}
 #editor-inner{display:flex;flex-direction:column;height:100vh}
-#toolbar{background:white;border-bottom:1px solid #e5e7eb;padding:8px 14px;display:flex;align-items:center;gap:6px;flex-shrink:0;flex-wrap:wrap}
+#toolbar2{background:white;border-bottom:1px solid #e5e7eb;padding:8px 14px;display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap}
 #main{display:flex;flex:1;overflow:hidden}
 #canvas-area{flex:1;overflow:auto;background:#d1cfc8;display:flex;align-items:flex-start;justify-content:center;padding:24px}
 #pdf-wrapper{position:relative;display:inline-block;box-shadow:0 4px 20px rgba(0,0,0,.2);flex-shrink:0}
 #pdf-img{display:block}
-.fov{position:absolute;cursor:move;min-width:60px;min-height:22px}
-.fov.dm{border:1.5px solid #3b82f6;background:rgba(59,130,246,.07)}
-.fov:not(.dm){overflow:hidden}
-.flbl{position:absolute;top:-19px;right:0;font-size:10px;color:#1d4ed8;white-space:nowrap;background:white;padding:1px 5px;border-radius:3px;border:1px solid #93c5fd;pointer-events:none}
-.fdel{position:absolute;top:-19px;left:0;width:17px;height:17px;background:#dc2626;color:white;border:none;border-radius:3px;cursor:pointer;font-size:13px;line-height:17px;text-align:center;padding:0;font-family:inherit}
-.frsz{position:absolute;bottom:-4px;left:-4px;width:10px;height:10px;background:#3b82f6;border-radius:2px;cursor:nwse-resize}
-.fval{padding:0 4px;width:100%;direction:rtl;pointer-events:none;word-break:break-word;overflow:hidden}
-#sidebar{width:290px;border-right:1px solid #e5e7eb;background:white;display:flex;flex-direction:column;flex-shrink:0}
-.stabs{display:flex;border-bottom:1px solid #e5e7eb}
-.stab{flex:1;padding:10px 4px;font-size:12.5px;text-align:center;cursor:pointer;border:none;background:none;font-family:inherit;color:#6b7280;border-bottom:2px solid transparent}
-.stab.on{color:#2563eb;border-bottom-color:#2563eb;font-weight:500}
-.spanel{flex:1;overflow-y:auto;padding:12px;display:none}
-.spanel.on{display:block}
-.crow{margin-bottom:10px}
-.clbl{font-size:11px;color:#6b7280;margin-bottom:4px;font-weight:600}
-.cinp{width:100%;padding:7px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;font-family:inherit;color:#1a1a1a;direction:rtl}
-.cinp:focus{outline:none;border-color:#3b82f6}
-.ffield{margin-bottom:12px;padding:10px;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb}
+.fov{position:absolute;overflow:hidden;pointer-events:none}
+.fval{padding:0 4px;width:100%;direction:rtl;word-break:break-word;overflow:hidden;line-height:1.3;padding-top:2px}
+#sidebar{width:280px;border-right:1px solid #e5e7eb;background:white;display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.sidebar-title{font-size:13px;font-weight:600;color:#374151;padding:14px 14px 8px}
+.ffield{margin:0 10px 10px;padding:10px;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb}
 .fflbl{font-size:11.5px;color:#6b7280;margin-bottom:5px;display:flex;align-items:center;gap:5px;font-weight:500}
-.ffinp{width:100%;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13.5px;font-family:inherit;direction:rtl}
-.ffinp:focus{outline:none;border-color:#3b82f6}
+.ffinp{width:100%;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13.5px;font-family:inherit;direction:rtl;background:white}
+.ffinp:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 2px rgba(59,130,246,.1)}
 .tbox{margin-top:6px;padding:7px 10px;background:#d1fae5;border-radius:6px;font-size:12px;color:#065f46;direction:rtl;line-height:1.5}
 .badge{font-size:10px;padding:2px 6px;border-radius:4px;font-weight:600}
 .bt{background:#dbeafe;color:#1e40af}.bn{background:#fef3c7;color:#92400e}
 .bd{background:#dcfce7;color:#166534}.btf{background:#f3e8ff;color:#7e22ce}
 #pnav{background:white;border-top:1px solid #e5e7eb;padding:8px;display:flex;align-items:center;justify-content:center;gap:12px;font-size:13px;flex-shrink:0}
-.fitem{display:flex;align-items:center;gap:7px;padding:7px;border:1px solid #e5e7eb;border-radius:6px;margin-bottom:5px;background:#fafafa}
-.hint-box{font-size:12px;color:#6b7280;padding:8px 10px;background:#f9fafb;border-radius:7px;border:1px solid #e5e7eb;line-height:1.6;margin-bottom:10px}
-
-/* ── Modal ── */
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;align-items:center;justify-content:center}
-.modal-bg.on{display:flex}
-.modal{background:white;border-radius:12px;padding:22px;width:340px;direction:rtl;max-height:90vh;overflow-y:auto}
-.modal h3{font-size:15px;font-weight:600;margin-bottom:14px;color:#111827}
-
-/* ── Upload progress ── */
-.progress-bar{height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden;margin-top:8px}
-.progress-fill{height:100%;background:#2563eb;border-radius:3px;transition:width .3s}
-
-/* ── Toast ── */
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(70px);background:#111827;color:white;padding:9px 18px;border-radius:8px;font-size:13px;transition:transform .28s;z-index:9999;pointer-events:none}
 #toast.on{transform:translateX(-50%) translateY(0)}
-
-@media print{
-  @page{size:A4 portrait;margin:0}
-  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  body *{visibility:hidden}
-  #print-area,#print-area *{visibility:visible}
-  #print-area{position:fixed;inset:0}
-}
+/* ── not-configured screen ── */
+#sc-nocfg{align-items:center;justify-content:center;background:linear-gradient(135deg,#1e3a5f,#2563eb)}
+.cfg-card{background:white;border-radius:16px;padding:32px;width:400px;text-align:center}
+.cfg-card h2{font-size:18px;font-weight:700;margin-bottom:10px}
+.cfg-card p{font-size:13px;color:#6b7280;line-height:1.6}
 </style>
 </head>
 <body>
 
-<!-- ══ SCREEN: SETUP ══ -->
-<div class="screen on" id="sc-setup">
-  <div class="setup-card">
-    <div class="setup-logo">
-      <div style="font-size:36px;margin-bottom:8px">📋</div>
-      <h1>نظام النماذج الذكي</h1>
-      <p>أدخل بيانات Supabase لربط النظام</p>
-    </div>
-    <div class="inp-row">
-      <label class="inp-lbl">Supabase URL</label>
-      <input class="inp" id="cfg-url" placeholder="https://xxxx.supabase.co" dir="ltr">
-    </div>
-    <div class="inp-row">
-      <label class="inp-lbl">Supabase Anon Key <span style="color:#6b7280">(للمستخدمين)</span></label>
-      <input class="inp" id="cfg-key" placeholder="eyJhbGciOiJIUzI1NiIs..." dir="ltr">
-      <div class="hint">من تاب: Legacy anon, service_role API keys → الـ <b>anon</b> key</div>
-    </div>
-    <div class="inp-row">
-      <label class="inp-lbl">Service Role Key <span style="color:#dc2626">(للأدمن فقط)</span></label>
-      <input class="inp" id="cfg-svc" placeholder="eyJhbGciOiJIUzI1NiIs..." dir="ltr">
-      <div class="hint">من نفس التاب → الـ <b>service_role</b> key — لا تشاركه مع أحد</div>
-    </div>
-    <div class="inp-row">
-      <label class="inp-lbl">كلمة مرور الأدمن</label>
-      <input class="inp" id="cfg-pass" type="password" placeholder="اختار كلمة مرور للإدارة">
-      <div class="hint">* ستُحفظ على هذا الجهاز فقط — شاركها مع المسؤولين</div>
-    </div>
-    <hr class="divider">
-    <button class="btn btn-pr" onclick="saveConfig()">💾 حفظ والبدء</button>
-    <div class="hint" style="text-align:center;margin-top:10px">
-      لا تعرف Supabase؟ <a href="SETUP.md" target="_blank" style="color:#2563eb">اقرأ دليل الإعداد</a>
-    </div>
+<!-- Not configured -->
+<div class="screen" id="sc-nocfg">
+  <div class="cfg-card">
+    <div style="font-size:48px;margin-bottom:12px">⚙️</div>
+    <h2>النظام غير مُعدّ</h2>
+    <p>هذه الصفحة للمستخدمين فقط.<br>للإعداد يرجى التواصل مع مسؤول النظام.</p>
   </div>
 </div>
 
-<!-- ══ SCREEN: HOME ══ -->
+<!-- Home -->
 <div class="screen" id="sc-home">
   <div class="topbar">
-    <div class="topbar-logo">نظام <span>النماذج</span></div>
-    <button class="tbtn" id="btn-admin-toggle" onclick="toggleAdmin()">🔐 وضع الأدمن</button>
-    <button class="tbtn" onclick="showScreen('sc-setup')">⚙️ الإعدادات</button>
+    <div class="topbar-logo">نماذج <span>الشركة</span></div>
   </div>
-
-  <!-- Admin toolbar (hidden by default) -->
-  <div id="admin-bar" style="display:none;background:#fefce8;border-bottom:1px solid #fde68a;padding:10px 20px;display:none;align-items:center;gap:10px;flex-wrap:wrap">
-    <span class="badge-admin">🛡️ وضع الأدمن</span>
-    <button class="tbtn pr" onclick="startNewTemplate()">➕ نموذج جديد</button>
-    <div style="flex:1"></div>
-    <button class="tbtn red" onclick="exitAdmin()">✕ خروج من الأدمن</button>
-  </div>
-
   <div class="content">
     <div class="section-title">النماذج المتاحة</div>
     <div class="section-sub">اختر نموذجاً لملء بياناته وطباعته</div>
@@ -186,63 +87,27 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#f4f2ef;color:#1a
   </div>
 </div>
 
-<!-- ══ SCREEN: EDITOR ══ -->
+<!-- Editor (fill only) -->
 <div class="screen" id="sc-editor">
   <div id="editor-inner">
-    <div id="toolbar">
+    <div id="toolbar2">
       <button class="tbtn" onclick="goHome()">← رجوع</button>
       <div class="sep"></div>
-      <button class="tbtn on" id="btn-dm" onclick="setMode('d')" style="display:none" id="btn-dm">✏️ تصميم</button>
-      <button class="tbtn" id="btn-fm" onclick="setMode('f')" style="display:none" id="btn-fm">📝 ملء البيانات</button>
-      <div class="sep" id="sep-mode" style="display:none"></div>
-      <button class="tbtn" onclick="clearVals()">🔄 مسح البيانات</button>
-      <button class="tbtn gr" onclick="printA4()">🖨️ طباعة A4</button>
-      <div class="sep" id="sep-save" style="display:none"></div>
-      <button class="tbtn pr" id="btn-save-tpl" onclick="saveTemplateCloud()" style="display:none">☁️ حفظ القالب</button>
+      <span id="tpl-title2" style="font-size:14px;font-weight:600;color:#111"></span>
       <div style="flex:1"></div>
-      <span id="tpl-title" style="font-size:13px;color:#6b7280;font-weight:500"></span>
+      <button class="tbtn" onclick="clearVals()">🔄 مسح</button>
+      <button class="tbtn gr" onclick="printA4()">🖨️ طباعة A4</button>
     </div>
     <div id="main">
       <div id="canvas-area">
-        <div id="pdf-wrapper" onclick="onWrapClick(event)">
+        <div id="pdf-wrapper">
           <img id="pdf-img" alt="">
         </div>
       </div>
       <div id="sidebar">
-        <div class="stabs">
-          <button class="stab on" id="stab-d" onclick="stab('d')">البيانات</button>
-          <button class="stab" id="stab-f" onclick="stab('f')">الحقول</button>
-          <button class="stab" id="stab-s" onclick="stab('s')">إعدادات</button>
-        </div>
-        <div class="spanel on" id="sp-d">
-          <div id="fill-form"></div>
-          <div id="fill-empty" style="text-align:center;color:#9ca3af;font-size:13px;padding:24px">لا توجد حقول</div>
-        </div>
-        <div class="spanel" id="sp-f">
-          <div class="hint-box" id="design-hint" style="display:none">💡 اضغط على الـ PDF لوضع حقل</div>
-          <div id="fields-list"></div>
-        </div>
-        <div class="spanel" id="sp-s">
-          <div class="crow"><div class="clbl">العملة</div>
-            <select class="cinp" id="s-cur" onchange="refreshAllTafqeet()">
-              <option value="" selected>بدون عملة</option>
-              <option value="ريال سعودي">ريال سعودي</option>
-              <option value="دولار أمريكي">دولار أمريكي</option>
-              <option value="درهم إماراتي">درهم إماراتي</option>
-              <option value="دينار كويتي">دينار كويتي</option>
-              <option value="جنيه مصري">جنيه مصري</option>
-            </select>
-          </div>
-          <div class="crow"><div class="clbl">حجم الخط</div><input type="number" class="cinp" id="s-fs" value="14" min="8" max="40"></div>
-          <div class="crow"><div class="clbl">لون النص</div><input type="color" class="cinp" id="s-col" value="#000000" style="height:38px;padding:4px"></div>
-          <div class="crow"><div class="clbl">محاذاة النص</div>
-            <select class="cinp" id="s-align">
-              <option value="right">يمين</option>
-              <option value="center">وسط</option>
-              <option value="left">يسار</option>
-            </select>
-          </div>
-        </div>
+        <div class="sidebar-title">📝 أدخل البيانات</div>
+        <div id="fill-form"></div>
+        <div id="fill-empty" style="text-align:center;color:#9ca3af;font-size:13px;padding:24px;display:none">لا توجد حقول في هذا النموذج</div>
       </div>
     </div>
     <div id="pnav">
@@ -253,327 +118,116 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#f4f2ef;color:#1a
   </div>
 </div>
 
-<!-- ══ MODALS ══ -->
-<!-- Field modal -->
-<div class="modal-bg" id="field-modal">
-  <div class="modal">
-    <h3>➕ إضافة حقل</h3>
-    <div class="crow"><div class="clbl">اسم الحقل *</div><input class="cinp" id="m-name" placeholder="مثال: اسم العميل" onkeydown="if(event.key==='Enter')confirmField()"></div>
-    <div class="crow"><div class="clbl">نوع الحقل</div>
-      <select class="cinp" id="m-type" onchange="toggleLinkRow()">
-        <option value="text">نص</option>
-        <option value="number">رقم (مع تفقيط)</option>
-        <option value="date">تاريخ</option>
-        <option value="tafqeet">تفقيط فقط (مرتبط برقم)</option>
-      </select>
-    </div>
-    <div class="crow" id="m-link-row" style="display:none"><div class="clbl">مرتبط بحقل الرقم</div><select class="cinp" id="m-link"></select></div>
-    <div class="crow"><div class="clbl">حجم الخط</div><input type="number" class="cinp" id="m-fs" value="14" min="8" max="40"></div>
-    <div class="crow"><div class="clbl">لون النص</div><input type="color" class="cinp" id="m-col" value="#000000" style="height:38px;padding:4px"></div>
-    <div class="crow"><div class="clbl">محاذاة النص</div>
-      <select class="cinp" id="m-align"><option value="right">يمين</option><option value="center">وسط</option><option value="left">يسار</option></select>
-    </div>
-    <div style="display:flex;gap:8px;margin-top:14px">
-      <button class="tbtn pr" style="flex:1" onclick="confirmField()">✓ إضافة</button>
-      <button class="tbtn" onclick="closeFieldModal()">إلغاء</button>
-    </div>
-  </div>
-</div>
-
-<!-- Admin login modal -->
-<div class="modal-bg" id="admin-modal">
-  <div class="modal">
-    <h3>🔐 دخول الأدمن</h3>
-    <div class="crow"><div class="clbl">كلمة المرور</div>
-      <input class="cinp" id="admin-pass-inp" type="password" placeholder="أدخل كلمة المرور" onkeydown="if(event.key==='Enter')checkAdminPass()">
-    </div>
-    <div id="admin-err" style="color:#dc2626;font-size:12px;display:none;margin-top:6px">كلمة المرور غلط</div>
-    <div style="display:flex;gap:8px;margin-top:14px">
-      <button class="tbtn pr" style="flex:1" onclick="checkAdminPass()">دخول</button>
-      <button class="tbtn" onclick="document.getElementById('admin-modal').classList.remove('on')">إلغاء</button>
-    </div>
-  </div>
-</div>
-
-<!-- New template modal -->
-<div class="modal-bg" id="new-tpl-modal">
-  <div class="modal">
-    <h3>📄 نموذج جديد</h3>
-    <div class="crow"><div class="clbl">اسم النموذج *</div><input class="cinp" id="nt-name" placeholder="مثال: فاتورة مبيعات"></div>
-    <div class="crow"><div class="clbl">ملف PDF *</div>
-      <input type="file" id="nt-file" accept=".pdf" style="width:100%;padding:8px;border:1px dashed #d1d5db;border-radius:6px;font-size:13px">
-    </div>
-    <div class="progress-bar" id="upload-progress-bar" style="display:none"><div class="progress-fill" id="upload-progress-fill" style="width:0%"></div></div>
-    <div id="upload-status" style="font-size:12px;color:#6b7280;margin-top:6px"></div>
-    <div style="display:flex;gap:8px;margin-top:14px">
-      <button class="tbtn pr" style="flex:1" onclick="uploadAndCreate()">رفع وإنشاء</button>
-      <button class="tbtn" onclick="document.getElementById('new-tpl-modal').classList.remove('on')">إلغاء</button>
-    </div>
-  </div>
-</div>
-
-<!-- Save template name modal -->
-<div class="modal-bg" id="save-tpl-modal">
-  <div class="modal">
-    <h3>💾 حفظ القالب</h3>
-    <div class="crow"><div class="clbl">اسم القالب</div><input class="cinp" id="st-name" placeholder="مثال: فاتورة مبيعات" onkeydown="if(event.key==='Enter')doSaveTemplate()"></div>
-    <div style="display:flex;gap:8px;margin-top:14px">
-      <button class="tbtn pr" style="flex:1" onclick="doSaveTemplate()">حفظ على السحابة ☁️</button>
-      <button class="tbtn" onclick="document.getElementById('save-tpl-modal').classList.remove('on')">إلغاء</button>
-    </div>
-  </div>
-</div>
-
 <div id="toast"></div>
 
 <script>
+// ══ CONFIG — يُضبط من admin.html تلقائياً ══
+const SUPABASE_URL = localStorage.getItem('cfg_url') || '';
+const SUPABASE_KEY = localStorage.getItem('cfg_key') || '';
+
 pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-// ══ Config & Supabase ══
-let supabase=null, supabaseAdmin=null;
-let isAdmin=false;
-let currentTplId=null, currentPdfPath=null;
-
-function initSupabase(url,key,svcKey){
-  supabase=window.supabase.createClient(url,key);
-  supabaseAdmin=svcKey
-    ? window.supabase.createClient(url,svcKey,{auth:{autoRefreshToken:false,persistSession:false}})
-    : supabase;
-}
-function db(){return supabaseAdmin||supabase;}
-
-async function saveConfig(){
-  const url=document.getElementById('cfg-url').value.trim();
-  const key=document.getElementById('cfg-key').value.trim();
-  const svc=document.getElementById('cfg-svc').value.trim();
-  const pass=document.getElementById('cfg-pass').value.trim();
-  if(!url||!key){alert('أدخل Supabase URL و Anon Key');return;}
-  try{
-    initSupabase(url,key,svc);
-    const {error}=await supabase.from('templates').select('id').limit(1);
-    if(error)throw error;
-    localStorage.setItem('sb_url',url);
-    localStorage.setItem('sb_key',key);
-    if(svc)localStorage.setItem('sb_svc',svc);
-    if(pass)localStorage.setItem('admin_pass',pass);
-    showScreen('sc-home');
-    loadTemplates();
-  }catch(e){
-    alert('❌ فشل الاتصال:\n'+e.message);
-  }
-}
+let sb = null;
+let pdf=null, page=1, pages=1, imgW=0, imgH=0;
+let fields=[];
 
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
   document.getElementById(id).classList.add('on');
 }
 
-// ══ Admin ══
-function toggleAdmin(){
-  if(isAdmin){exitAdmin();return;}
-  document.getElementById('admin-pass-inp').value='';
-  document.getElementById('admin-err').style.display='none';
-  document.getElementById('admin-modal').classList.add('on');
-  setTimeout(()=>document.getElementById('admin-pass-inp').focus(),80);
-}
-function checkAdminPass(){
-  const p=document.getElementById('admin-pass-inp').value;
-  const stored=localStorage.getItem('admin_pass')||'admin';
-  if(p===stored){
-    isAdmin=true;
-    document.getElementById('admin-modal').classList.remove('on');
-    document.getElementById('admin-bar').style.display='flex';
-    document.getElementById('btn-admin-toggle').textContent='🛡️ أدمن';
-    loadTemplates();
-    toast('مرحباً بك في وضع الأدمن ✓');
-  } else {
-    document.getElementById('admin-err').style.display='block';
-  }
-}
-function exitAdmin(){
-  isAdmin=false;
-  document.getElementById('admin-bar').style.display='none';
-  document.getElementById('btn-admin-toggle').textContent='🔐 وضع الأدمن';
+// ══ Init ══
+window.addEventListener('load', async ()=>{
+  if(!SUPABASE_URL || !SUPABASE_KEY){ showScreen('sc-nocfg'); return; }
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  showScreen('sc-home');
   loadTemplates();
-}
+});
 
-// ══ Home & Templates ══
+// ══ Templates ══
 async function loadTemplates(){
-  const grid=document.getElementById('templates-grid');
-  grid.innerHTML='<div class="loading"><div class="spinner"></div> جاري التحميل...</div>';
-  if(!supabase){grid.innerHTML='<div class="empty-state"><div class="icon">⚙️</div><p>أعد الإعداد أولاً</p></div>';return;}
-  try{
-    const {data,error}=await supabase.from('templates').select('*').order('created_at',{ascending:false});
-    if(error)throw error;
-    if(!data||!data.length){
-      grid.innerHTML=`<div class="empty-state"><div class="icon">📭</div><p>${isAdmin?'لا توجد نماذج — أضف نموذجاً جديداً من الأعلى':'لا توجد نماذج متاحة بعد'}</p></div>`;
-      return;
-    }
-    grid.innerHTML=data.map(t=>`
-      <div class="tpl-card">
-        <div class="tpl-thumb">📄</div>
-        <div class="tpl-info">
-          <div class="tpl-name">${t.name}</div>
-          <div class="tpl-meta">${t.pdf_name} · ${new Date(t.created_at).toLocaleDateString('ar-SA')}</div>
-          <div class="tpl-actions">
-            <button class="tpl-btn tpl-btn-open" onclick="openTemplate('${t.id}')">فتح وملء</button>
-            ${isAdmin?`<button class="tpl-btn tpl-btn-open" style="background:#f0fdf4;color:#166534" onclick="editTemplate('${t.id}')">تعديل</button>
-            <button class="tpl-btn tpl-btn-del" onclick="deleteTemplate('${t.id}')">حذف</button>`:''}
-          </div>
-        </div>
-      </div>`).join('');
-  }catch(e){
-    grid.innerHTML=`<div class="empty-state"><div class="icon">❌</div><p>خطأ في التحميل: ${e.message}</p></div>`;
+  const grid = document.getElementById('templates-grid');
+  grid.innerHTML = '<div class="loading"><div class="spinner"></div> جاري التحميل...</div>';
+  const {data, error} = await sb.from('templates').select('*').order('created_at',{ascending:false});
+  if(error || !data?.length){
+    grid.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>لا توجد نماذج متاحة بعد</p></div>';
+    return;
   }
+  grid.innerHTML = data.map(t=>`
+    <div class="tpl-card" onclick="openTemplate('${t.id}')">
+      <div class="tpl-thumb">📄</div>
+      <div class="tpl-info">
+        <div class="tpl-name">${t.name}</div>
+        <div class="tpl-meta">${new Date(t.created_at).toLocaleDateString('ar-SA')}</div>
+        <button class="tbtn pr" style="width:100%;justify-content:center">فتح وملء ←</button>
+      </div>
+    </div>`).join('');
 }
 
-async function deleteTemplate(id){
-  if(!confirm('حذف هذا النموذج نهائياً؟'))return;
-  await db().from('templates').delete().eq('id',id);
-  toast('تم الحذف');
-  loadTemplates();
-}
-
-function goHome(){showScreen('sc-home');loadTemplates();}
-
-// ══ New Template (Admin) ══
-function startNewTemplate(){
-  document.getElementById('nt-name').value='';
-  document.getElementById('nt-file').value='';
-  document.getElementById('upload-status').textContent='';
-  document.getElementById('upload-progress-bar').style.display='none';
-  document.getElementById('new-tpl-modal').classList.add('on');
-}
-
-async function uploadAndCreate(){
-  const name=document.getElementById('nt-name').value.trim();
-  const fileInp=document.getElementById('nt-file');
-  if(!name){alert('أدخل اسم النموذج');return;}
-  if(!fileInp.files[0]){alert('اختر ملف PDF');return;}
-  const file=fileInp.files[0];
-  const safeName='file_'+Date.now()+'.pdf';
-  const path=`pdfs/${safeName}`;
-  document.getElementById('upload-progress-bar').style.display='block';
-  document.getElementById('upload-status').textContent='جاري الرفع...';
-  document.getElementById('upload-progress-fill').style.width='30%';
-  const {error:upErr}=await db().storage.from('pdfs').upload(path,file,{cacheControl:'3600',upsert:false});
-  if(upErr){alert('خطأ في رفع الملف: '+upErr.message);return;}
-  document.getElementById('upload-progress-fill').style.width='70%';
-  const {data:inserted,error:insErr}=await db().from('templates').insert({name,pdf_name:file.name,pdf_path:path,fields:[]}).select().single();
-  if(insErr){alert('خطأ في الحفظ: '+insErr.message);return;}
-  document.getElementById('upload-progress-fill').style.width='100%';
-  document.getElementById('upload-status').textContent='تم الرفع ✓';
-  document.getElementById('new-tpl-modal').classList.remove('on');
-  toast('تم رفع النموذج ✓ — افتحه لتصميم الحقول');
-  loadTemplates();
-  // auto open for design
-  await openTemplateById(inserted,true);
-}
-
-// ══ Open Template ══
 async function openTemplate(id){
-  const {data,error}=await supabase.from('templates').select('*').eq('id',id).single();
-  if(error||!data){toast('خطأ في التحميل');return;}
-  await openTemplateById(data,false);
-}
-
-async function editTemplate(id){
-  const {data,error}=await supabase.from('templates').select('*').eq('id',id).single();
-  if(error||!data){toast('خطأ في التحميل');return;}
-  await openTemplateById(data,true);
-}
-
-async function openTemplateById(tpl,designMode){
-  currentTplId=tpl.id;
-  currentPdfPath=tpl.pdf_path;
-  fields=tpl.fields||[];
-  document.getElementById('tpl-title').textContent=tpl.name;
-  // show/hide admin controls
-  const dm=designMode&&isAdmin;
-  document.getElementById('btn-dm').style.display=dm?'':'none';
-  document.getElementById('btn-fm').style.display=dm?'':'none';
-  document.getElementById('sep-mode').style.display=dm?'':'none';
-  document.getElementById('btn-save-tpl').style.display=dm?'':'none';
-  document.getElementById('sep-save').style.display=dm?'':'none';
-  document.getElementById('design-hint').style.display=dm?'block':'none';
-  mode=dm?'d':'f';
-  document.getElementById('btn-dm').classList.toggle('on',mode==='d');
-  document.getElementById('btn-fm').classList.toggle('on',mode==='f');
-  document.getElementById('pdf-wrapper').style.cursor=dm?'crosshair':'default';
-  // get PDF URL
-  const {data}=supabase.storage.from('pdfs').getPublicUrl(tpl.pdf_path);
+  const {data,error} = await sb.from('templates').select('*').eq('id',id).single();
+  if(error||!data){ toast('خطأ في التحميل'); return; }
+  fields = (data.fields||[]).map(f=>({...f,val:'',_raw:''}));
+  document.getElementById('tpl-title2').textContent = data.name;
+  const {data:urlData} = sb.storage.from('pdfs').getPublicUrl(data.pdf_path);
   showScreen('sc-editor');
-  await loadPDFFromUrl(data.publicUrl);
-  refreshAll();
+  await loadPDF(urlData.publicUrl);
+  renderFillForm();
+  renderOverlays();
 }
 
-// ══ PDF Rendering ══
-let pdf=null, page=1, pages=1, imgW=0, imgH=0;
-let fields=[], mode='f';
-let cx=0, cy=0, dox=0, doy=0;
+function goHome(){ showScreen('sc-home'); loadTemplates(); }
 
-async function loadPDFFromUrl(url){
-  const resp=await fetch(url);
-  const buf=await resp.arrayBuffer();
-  pdf=await pdfjsLib.getDocument({data:buf}).promise;
-  pages=pdf.numPages; page=1;
+// ══ PDF ══
+async function loadPDF(url){
+  const buf = await (await fetch(url)).arrayBuffer();
+  pdf = await pdfjsLib.getDocument({data:buf}).promise;
+  pages = pdf.numPages; page = 1;
   await renderPage();
 }
-
 async function renderPage(){
-  const pg=await pdf.getPage(page);
-  const RENDER_SCALE=2.5, DISPLAY_SCALE=1.5;
-  const vp=pg.getViewport({scale:RENDER_SCALE});
-  const oc=document.createElement('canvas');
+  const pg = await pdf.getPage(page);
+  const RS=2.5, DS=1.5;
+  const vp = pg.getViewport({scale:RS});
+  const oc = document.createElement('canvas');
   oc.width=vp.width; oc.height=vp.height;
   await pg.render({canvasContext:oc.getContext('2d'),viewport:vp}).promise;
-  const blob=await new Promise(r=>oc.toBlob(r,'image/png'));
-  const url=URL.createObjectURL(blob);
-  const img=document.getElementById('pdf-img');
-  if(img._blobUrl)URL.revokeObjectURL(img._blobUrl);
-  img._blobUrl=url;
-  imgW=Math.round(vp.width/RENDER_SCALE*DISPLAY_SCALE);
-  imgH=Math.round(vp.height/RENDER_SCALE*DISPLAY_SCALE);
-  img.src=url;
+  const blob = await new Promise(r=>oc.toBlob(r,'image/png'));
+  const url = URL.createObjectURL(blob);
+  const img = document.getElementById('pdf-img');
+  if(img._blobUrl) URL.revokeObjectURL(img._blobUrl);
+  img._blobUrl = url;
+  imgW = Math.round(vp.width/RS*DS);
+  imgH = Math.round(vp.height/RS*DS);
+  img.src = url;
   await new Promise(r=>{img.onload=r;img.onerror=r;});
   img.style.width=imgW+'px'; img.style.height=imgH+'px';
-  const wr=document.getElementById('pdf-wrapper');
+  const wr = document.getElementById('pdf-wrapper');
   wr.style.width=imgW+'px'; wr.style.height=imgH+'px';
   document.getElementById('pinfo').textContent=`الصفحة ${page} من ${pages}`;
   document.getElementById('btn-prev').disabled=page<=1;
   document.getElementById('btn-next').disabled=page>=pages;
   renderOverlays();
 }
-
 async function goPage(d){const np=page+d;if(np>=1&&np<=pages){page=np;await renderPage();}}
-
-// ══ Mode ══
-function setMode(m){
-  mode=m;
-  document.getElementById('btn-dm').classList.toggle('on',m==='d');
-  document.getElementById('btn-fm').classList.toggle('on',m==='f');
-  document.getElementById('pdf-wrapper').style.cursor=m==='d'?'crosshair':'default';
-  renderOverlays();
-}
 
 // ══ Tafqeet ══
 function n2w(n){
-  n=Math.floor(n); if(n===0)return'صفر';
+  n=Math.floor(n);if(n===0)return'صفر';
   const o=['','واحد','اثنان','ثلاثة','أربعة','خمسة','ستة','سبعة','ثمانية','تسعة','عشرة','أحد عشر','اثنا عشر','ثلاثة عشر','أربعة عشر','خمسة عشر','ستة عشر','سبعة عشر','ثمانية عشر','تسعة عشر'];
   const t=['','','عشرون','ثلاثون','أربعون','خمسون','ستون','سبعون','ثمانون','تسعون'];
   const h=['','مئة','مئتان','ثلاثمئة','أربعمئة','خمسمئة','ستمئة','سبعمئة','ثمانمئة','تسعمئة'];
-  function g(x){if(x===0)return'';if(x<20)return o[x];const a=Math.floor(x/10),b=x%10;if(x<100)return b?o[b]+' و'+t[a]:t[a];const c=Math.floor(x/100),dd=x%100;return dd?h[c]+' و'+g(dd):h[c];}
+  function g(x){if(x===0)return'';if(x<20)return o[x];const a=Math.floor(x/10),b=x%10;if(x<100)return b?o[b]+' و'+t[a]:t[a];const c=Math.floor(x/100),d=x%100;return d?h[c]+' و'+g(d):h[c];}
   const B=Math.floor(n/1e9),M=Math.floor((n%1e9)/1e6),T=Math.floor((n%1e6)/1e3),R=n%1e3;
-  let p=[];
+  const p=[];
   if(B)p.push(B===1?'مليار':B===2?'ملياران':g(B)+(B<=10?' مليارات':' مليار'));
   if(M)p.push(M===1?'مليون':M===2?'مليونان':g(M)+(M<=10?' ملايين':' مليون'));
   if(T)p.push(T===1?'ألف':T===2?'ألفان':g(T)+(T<=10?' آلاف':' ألف'));
   if(R)p.push(g(R));
   return p.join(' و');
 }
-function tafqeet(v){
+function tafqeet(v,cur=''){
   if(!v||isNaN(v))return'';
-  const cur=document.getElementById('s-cur').value;
   const sub={'ريال سعودي':'هللة','دولار أمريكي':'سنت','درهم إماراتي':'فلس','دينار كويتي':'فلس','جنيه مصري':'قرش'};
   const n=parseFloat(v),i=Math.floor(n),d=Math.round((n-i)*100);
   if(!cur){let r='فقط '+n2w(i);if(d>0)r+=' و'+n2w(d)+' جزء من مئة';return r;}
@@ -581,189 +235,103 @@ function tafqeet(v){
   if(d>0)r+=' و'+n2w(d)+' '+(sub[cur]||'فلس');
   return r;
 }
-function refreshAllTafqeet(){
-  fields.filter(f=>f.type==='number'&&f.val).forEach(f=>{
-    const tb=document.getElementById('tf_'+f.id);
-    if(tb)tb.textContent=tafqeet(f.val);
-    fields.filter(x=>x.type==='tafqeet'&&x.linkTo===f.id).forEach(tf=>{
-      const el=document.getElementById('atf_'+tf.id);
-      if(el)el.textContent=tafqeet(f.val);
-    });
-  });
-  renderOverlays();
-}
-
-// ══ Field Click ══
-function onWrapClick(e){
-  if(mode!=='d')return;
-  if(e.target.closest&&e.target.closest('.fov'))return;
-  const r=document.getElementById('pdf-wrapper').getBoundingClientRect();
-  cx=e.clientX-r.left; cy=e.clientY-r.top;
-  openFieldModal();
-}
-
-function openFieldModal(){
-  document.getElementById('m-name').value='';
-  document.getElementById('m-type').value='text';
-  document.getElementById('m-fs').value=document.getElementById('s-fs').value||'14';
-  document.getElementById('m-col').value=document.getElementById('s-col').value||'#000000';
-  document.getElementById('m-align').value=document.getElementById('s-align').value||'right';
-  document.getElementById('m-link-row').style.display='none';
-  const ls=document.getElementById('m-link');
-  ls.innerHTML='<option value="">اختر...</option>'+fields.filter(f=>f.type==='number').map(f=>`<option value="${f.id}">${f.name}</option>`).join('');
-  document.getElementById('field-modal').classList.add('on');
-  setTimeout(()=>document.getElementById('m-name').focus(),80);
-}
-function closeFieldModal(){document.getElementById('field-modal').classList.remove('on');}
-function toggleLinkRow(){document.getElementById('m-link-row').style.display=document.getElementById('m-type').value==='tafqeet'?'block':'none';}
-function confirmField(){
-  const name=document.getElementById('m-name').value.trim();
-  if(!name){alert('أدخل اسم الحقل');return;}
-  fields.push({id:'f'+Date.now(),name,type:document.getElementById('m-type').value,x:cx,y:cy,w:180,h:28,
-    fs:parseInt(document.getElementById('m-fs').value)||14,col:document.getElementById('m-col').value,
-    align:document.getElementById('m-align').value,linkTo:document.getElementById('m-link').value||null,pg:page,val:''});
-  closeFieldModal();renderOverlays();refreshAll();toast('تم إضافة الحقل ✓');
+function getFieldCur(f){ return f.currency||''; }
+function getVal(f){
+  if(f.type==='tafqeet'&&f.linkTo){const lf=fields.find(x=>x.id===f.linkTo);return lf?tafqeet(lf.val,getFieldCur(lf)):'';}
+  return f.val;
 }
 
 // ══ Overlays ══
-function typeLabel(t){return{text:'نص',number:'رقم',date:'تاريخ',tafqeet:'تفقيط'}[t]||t;}
-function typeBadge(t){return{text:'bt',number:'bn',date:'bd',tafqeet:'btf'}[t]||'bt';}
-function getVal(f){if(f.type==='tafqeet'&&f.linkTo){const lf=fields.find(x=>x.id===f.linkTo);return lf?tafqeet(lf.val):'';}return f.val;}
-
 function renderOverlays(){
   const wr=document.getElementById('pdf-wrapper');
   wr.querySelectorAll('.fov').forEach(el=>el.remove());
   fields.filter(f=>f.pg===page).forEach(f=>{
     const d=document.createElement('div');
-    d.className='fov'+(mode==='d'?' dm':'');
-    d.id='ov_'+f.id;
-    d.style.cssText=`left:${f.x}px;top:${f.y}px;width:${f.w}px;height:${f.h}px;`;
-    if(mode==='d'){
-      const lbl=document.createElement('div');lbl.className='flbl';lbl.textContent=f.name;
-      const del=document.createElement('button');del.className='fdel';del.textContent='×';
-      del.onclick=e=>{e.stopPropagation();fields=fields.filter(x=>x.id!==f.id);renderOverlays();refreshAll();};
-      const rsz=document.createElement('div');rsz.className='frsz';rsz.onmousedown=e=>startResize(e,f.id);
-      d.appendChild(lbl);d.appendChild(del);d.appendChild(rsz);
-      d.onmousedown=e=>{if(e.target===d||e.target===lbl)startDrag(e,f.id);};
-    }
-    const v=document.createElement('div');v.className='fval';
-    v.style.cssText=`font-size:${f.fs}px;color:${f.col};text-align:${f.align};line-height:1.3;padding-top:2px;`;
-    v.textContent=getVal(f)||(mode==='d'?'':' ');
-    d.appendChild(v);wr.appendChild(d);
+    d.className='fov';
+    d.style.cssText=`left:${f.x}px;top:${f.y}px;width:${f.w}px;height:${f.h}px;position:absolute;`;
+    const v=document.createElement('div');
+    v.className='fval';
+    v.style.cssText=`font-size:${f.fs}px;color:${f.col};text-align:${f.align};`;
+    v.textContent=getVal(f)||'';
+    d.appendChild(v); wr.appendChild(d);
   });
 }
 
-function startDrag(e,id){
-  e.preventDefault();e.stopPropagation();
-  const f=fields.find(x=>x.id===id);
-  dox=e.clientX-f.x;doy=e.clientY-f.y;
-  function mv(ev){f.x=ev.clientX-dox;f.y=ev.clientY-doy;const el=document.getElementById('ov_'+id);if(el){el.style.left=f.x+'px';el.style.top=f.y+'px';}}
-  function up(){document.removeEventListener('mousemove',mv);document.removeEventListener('mouseup',up);}
-  document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up);
-}
-function startResize(e,id){
-  e.preventDefault();e.stopPropagation();
-  const f=fields.find(x=>x.id===id),sx=e.clientX,sy=e.clientY,sw=f.w,sh=f.h;
-  function mv(ev){f.w=Math.max(60,sw+(sx-ev.clientX));f.h=Math.max(18,sh+(ev.clientY-sy));const el=document.getElementById('ov_'+id);if(el){el.style.width=f.w+'px';el.style.height=f.h+'px';}}
-  function up(){document.removeEventListener('mousemove',mv);document.removeEventListener('mouseup',up);renderOverlays();}
-  document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up);
-}
-
 // ══ Fill Form ══
+function typeLabel(t){return{text:'نص',number:'رقم',date:'تاريخ',tafqeet:'تفقيط'}[t]||t;}
+function typeBadge(t){return{text:'bt',number:'bn',date:'bd',tafqeet:'btf'}[t]||'bt';}
+
 function renderFillForm(){
   const fm=document.getElementById('fill-form'),em=document.getElementById('fill-empty');
   if(!fields.length){fm.innerHTML='';em.style.display='block';return;}
   em.style.display='none';
   fm.innerHTML=fields.map(f=>{
-    if(f.type==='tafqeet'){const lf=fields.find(x=>x.id===f.linkTo);return`<div class="ffield"><div class="fflbl"><span class="badge btf">تفقيط</span> ${f.name}</div><div class="tbox" id="atf_${f.id}">${lf&&lf.val?tafqeet(lf.val):'يُملأ تلقائياً'}</div></div>`;}
-    const inp=f.type==='number'
+    if(f.type==='tafqeet'){
+      const lf=fields.find(x=>x.id===f.linkTo);
+      return`<div class="ffield"><div class="fflbl"><span class="badge btf">تفقيط</span> ${f.name}</div><div class="tbox" id="atf_${f.id}">${lf&&lf.val?tafqeet(lf.val,getFieldCur(lf)):'يُملأ تلقائياً'}</div></div>`;
+    }
+    const inp = f.type==='number'
       ?`<input type="number" class="ffinp" id="inp_${f.id}" value="${f.val||''}" placeholder="0.00" oninput="upd('${f.id}',this.value)">`
       :f.type==='date'
       ?`<input type="date" class="ffinp" id="inp_${f.id}" value="${f._raw||''}" onchange="updDate('${f.id}',this.value)">`
       :`<input type="text" class="ffinp" id="inp_${f.id}" value="${f.val||''}" placeholder="${f.name}" oninput="upd('${f.id}',this.value)">`;
-    const tfbox=f.type==='number'?`<div class="tbox" id="tf_${f.id}">${f.val?tafqeet(f.val):'أدخل رقماً للتفقيط التلقائي'}</div>`:'';
+    const tfbox=f.type==='number'?`<div class="tbox" id="tf_${f.id}">${f.val?tafqeet(f.val,getFieldCur(f)):'أدخل رقماً'}</div>`:'';
     return`<div class="ffield"><div class="fflbl"><span class="badge ${typeBadge(f.type)}">${typeLabel(f.type)}</span> ${f.name}</div>${inp}${tfbox}</div>`;
   }).join('');
 }
 
 function upd(id,v){
   const f=fields.find(x=>x.id===id);if(!f)return;f.val=v;
-  if(f.type==='number'){const tb=document.getElementById('tf_'+id);if(tb)tb.textContent=v?tafqeet(v):'أدخل رقماً للتفقيط التلقائي';
-    fields.filter(x=>x.type==='tafqeet'&&x.linkTo===id).forEach(tf=>{const el=document.getElementById('atf_'+tf.id);if(el)el.textContent=v?tafqeet(v):'يُملأ تلقائياً';});}
+  if(f.type==='number'){
+    const tb=document.getElementById('tf_'+id);
+    if(tb)tb.textContent=v?tafqeet(v,getFieldCur(f)):'أدخل رقماً';
+    fields.filter(x=>x.type==='tafqeet'&&x.linkTo===id).forEach(tf=>{
+      const el=document.getElementById('atf_'+tf.id);
+      if(el)el.textContent=v?tafqeet(v,getFieldCur(f)):'يُملأ تلقائياً';
+    });
+  }
   renderOverlays();
 }
-function updDate(id,v){const f=fields.find(x=>x.id===id);if(!f||!v)return;f._raw=v;const d=new Date(v);f.val=d.toLocaleDateString('ar-SA',{year:'numeric',month:'long',day:'numeric'});renderOverlays();}
-function clearVals(){if(!confirm('مسح جميع البيانات؟'))return;fields.forEach(f=>{f.val='';f._raw='';});renderFillForm();renderOverlays();}
-
-function renderFieldsList(){
-  const el=document.getElementById('fields-list');
-  if(!fields.length){el.innerHTML='<div style="text-align:center;color:#9ca3af;font-size:13px;padding:16px">لا توجد حقول</div>';return;}
-  el.innerHTML=fields.map(f=>`<div class="fitem"><span class="badge ${typeBadge(f.type)}">${typeLabel(f.type)}</span><span style="flex:1;font-size:13px">${f.name}</span><span style="font-size:11px;color:#9ca3af">ص${f.pg}</span><button onclick="fields=fields.filter(x=>x.id!=='${f.id}');renderOverlays();refreshAll()" style="border:none;background:none;color:#dc2626;cursor:pointer;font-size:17px">×</button></div>`).join('');
+function updDate(id,v){
+  const f=fields.find(x=>x.id===id);if(!f||!v)return;
+  f._raw=v;
+  f.val=new Date(v).toLocaleDateString('ar-SA',{year:'numeric',month:'long',day:'numeric'});
+  renderOverlays();
+}
+function clearVals(){
+  if(!confirm('مسح جميع البيانات المدخلة؟'))return;
+  fields.forEach(f=>{f.val='';f._raw='';});
+  renderFillForm(); renderOverlays();
 }
 
-function stab(id){['d','f','s'].forEach(t=>{document.getElementById('sp-'+t).classList.toggle('on',t===id);document.getElementById('stab-'+t).classList.toggle('on',t===id);});}
-function refreshAll(){renderFieldsList();renderFillForm();}
-
-// ══ Save Template to Cloud ══
-function saveTemplateCloud(){
-  document.getElementById('st-name').value=document.getElementById('tpl-title').textContent||'';
-  document.getElementById('save-tpl-modal').classList.add('on');
-  setTimeout(()=>document.getElementById('st-name').focus(),80);
-}
-async function doSaveTemplate(){
-  const name=document.getElementById('st-name').value.trim();
-  if(!name){alert('أدخل اسم القالب');return;}
-  const cleanFields=fields.map(f=>({...f,val:'',_raw:''}));
-  let result;
-  if(currentTplId){
-    result=await db().from('templates').update({name,fields:cleanFields}).eq('id',currentTplId);
-  } else {
-    result=await db().from('templates').insert({name,pdf_name:'',pdf_path:currentPdfPath||'',fields:cleanFields});
-  }
-  if(result.error){alert('خطأ في الحفظ: '+result.error.message);return;}
-  document.getElementById('save-tpl-modal').classList.remove('on');
-  document.getElementById('tpl-title').textContent=name;
-  toast('تم حفظ القالب على السحابة ✓');
-}
-
-// ══ Print A4 ══
+// ══ Print ══
 async function printA4(){
   toast('جاري تجهيز الطباعة...');
-  const A4W=794,A4H=1123;
-  const scaleX=A4W/imgW,scaleY=A4H/imgH;
-  const pageImgs=[];
+  const A4W=794,A4H=1123,scaleX=A4W/imgW,scaleY=A4H/imgH;
+  const imgs=[];
   for(let p=1;p<=pages;p++){
     const pg=await pdf.getPage(p);
     const vp=pg.getViewport({scale:2.5});
     const oc=document.createElement('canvas');oc.width=vp.width;oc.height=vp.height;
     await pg.render({canvasContext:oc.getContext('2d'),viewport:vp}).promise;
     const blob=await new Promise(r=>oc.toBlob(r,'image/png'));
-    pageImgs.push(URL.createObjectURL(blob));
+    imgs.push(URL.createObjectURL(blob));
   }
-  const pagesHTML=pageImgs.map((src,i)=>{
+  const pagesHTML=imgs.map((src,i)=>{
     const pg=i+1;
     const overlays=fields.filter(f=>f.pg===pg).map(f=>{
-      const val=f.type==='tafqeet'&&f.linkTo?tafqeet(fields.find(x=>x.id===f.linkTo)?.val||''):f.val;
-      if(!val)return'';
+      const val=getVal(f);if(!val)return'';
       return`<div style="position:absolute;left:${Math.round(f.x*scaleX)}px;top:${Math.round(f.y*scaleY)}px;width:${Math.round(f.w*scaleX)}px;height:${Math.round(f.h*scaleY)}px;font-size:${Math.round(f.fs*Math.min(scaleX,scaleY))}px;color:${f.col};text-align:${f.align};direction:rtl;font-family:Tahoma,Arial,sans-serif;overflow:hidden;padding:2px 4px;line-height:1.3;box-sizing:border-box;">${val}</div>`;
     }).join('');
     return`<div style="position:relative;width:${A4W}px;height:${A4H}px;${i<pages-1?'page-break-after:always;':''}overflow:hidden;"><img src="${src}" style="width:${A4W}px;height:${A4H}px;display:block;">${overlays}</div>`;
   }).join('');
   const win=window.open('','_blank');
-  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>*{margin:0;padding:0;box-sizing:border-box}body{background:white}@page{size:A4 portrait;margin:0}@media print{div{page-break-inside:avoid}}</style></head><body>${pagesHTML}<script>window.onload=function(){window.print();window.onafterprint=function(){window.close();};}<\/script></body></html>`);
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>*{margin:0;padding:0;box-sizing:border-box}body{background:white}@page{size:A4 portrait;margin:0}</style></head><body>${pagesHTML}<script>window.onload=function(){window.print();window.onafterprint=function(){window.close();};}<\/script></body></html>`);
   win.document.close();
 }
 
-// ══ Toast ══
 let toastT;
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('on'),2800);}
-
-// ══ Init ══
-window.addEventListener('load',()=>{
-  const url=localStorage.getItem('sb_url'),key=localStorage.getItem('sb_key'),svc=localStorage.getItem('sb_svc');
-  if(url&&key){initSupabase(url,key,svc);showScreen('sc-home');loadTemplates();}
-  else{showScreen('sc-setup');}
-});
 </script>
 </body>
 </html>
