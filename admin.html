@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة الإدارة — النماذج</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#f4f2ef;color:#1a1a1a;direction:rtl}
+.screen{display:none;min-height:100vh}.screen.on{display:flex;flex-direction:column}
+
+/* ── Login ── */
+#sc-login{align-items:center;justify-content:center;background:linear-gradient(135deg,#1e3a5f,#2563eb)}
+.card{background:white;border-radius:16px;padding:32px;width:420px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.card-logo{text-align:center;margin-bottom:24px}
+.card-logo h1{font-size:20px;font-weight:700;color:#111}
+.card-logo p{font-size:13px;color:#6b7280;margin-top:4px}
+.inp-row{margin-bottom:14px}
+.inp-lbl{font-size:12px;font-weight:600;color:#374151;margin-bottom:5px;display:block}
+.inp{width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;font-family:inherit}
+.inp:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+.inp[dir=ltr]{direction:ltr}
+.btn-full{padding:10px;border-radius:8px;border:none;cursor:pointer;font-size:14px;font-family:inherit;font-weight:500;background:#2563eb;color:white;width:100%}
+.btn-full:hover{background:#1d4ed8}
+.divider{border:none;border-top:1px solid #e5e7eb;margin:16px 0}
+.hint{font-size:11px;color:#9ca3af;margin-top:6px;line-height:1.5}
+.err-msg{color:#dc2626;font-size:12px;margin-top:6px;display:none}
+
+/* ── Topbar ── */
+.topbar{background:#1e293b;padding:0 20px;display:flex;align-items:center;height:52px;gap:10px;flex-shrink:0;position:sticky;top:0;z-index:100}
+.topbar-logo{font-size:14px;font-weight:700;color:white;flex:1}
+.topbar-logo span{color:#60a5fa}
+.tbtn{padding:6px 13px;border-radius:7px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);cursor:pointer;font-size:13px;font-family:inherit;display:inline-flex;align-items:center;gap:5px;transition:all .15s;color:rgba(255,255,255,.85);white-space:nowrap}
+.tbtn:hover{background:rgba(255,255,255,.15)}
+.tbtn.pr{background:#2563eb;color:white;border-color:#2563eb}
+.tbtn.gr{background:#059669;color:white;border-color:#059669}
+.tbtn.red{background:#dc2626;color:white;border-color:#dc2626}
+.sep{width:1px;height:24px;background:rgba(255,255,255,.2);margin:0 3px;flex-shrink:0}
+
+/* ── Home ── */
+.content{flex:1;padding:28px 24px}
+.section-title{font-size:18px;font-weight:700;color:#111;margin-bottom:6px}
+.section-sub{font-size:13px;color:#6b7280;margin-bottom:20px}
+.templates-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.tpl-card{background:white;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;transition:all .18s}
+.tpl-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.1)}
+.tpl-thumb{height:130px;background:linear-gradient(135deg,#fef3c7,#fffbeb);display:flex;align-items:center;justify-content:center;font-size:44px}
+.tpl-info{padding:12px}
+.tpl-name{font-size:14px;font-weight:600;color:#111;margin-bottom:3px}
+.tpl-meta{font-size:11px;color:#9ca3af;margin-bottom:10px}
+.tpl-actions{display:flex;gap:6px}
+.tpl-btn{flex:1;padding:7px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-family:inherit;font-weight:500;transition:all .15s}
+.tpl-btn:hover{opacity:.85}
+.tb-edit{background:#eff6ff;color:#1d4ed8}
+.tb-del{background:#fef2f2;color:#dc2626}
+.loading{display:flex;align-items:center;justify-content:center;padding:60px;gap:10px;color:#6b7280;font-size:14px}
+.spinner{width:20px;height:20px;border:2px solid #e5e7eb;border-top-color:#3b82f6;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-state{text-align:center;padding:60px 20px;color:#9ca3af}
+
+/* ── Editor ── */
+#sc-editor{height:100vh;overflow:hidden}
+#editor-inner{display:flex;flex-direction:column;height:100vh}
+#toolbar2{background:white;border-bottom:1px solid #e5e7eb;padding:8px 14px;display:flex;align-items:center;gap:6px;flex-shrink:0;flex-wrap:wrap}
+.etbtn{padding:7px 13px;border-radius:7px;border:1px solid #e5e7eb;background:white;cursor:pointer;font-size:13px;font-family:inherit;display:inline-flex;align-items:center;gap:5px;transition:all .15s;color:#374151;white-space:nowrap}
+.etbtn:hover{background:#f3f4f6}
+.etbtn.on{background:#eff6ff;border-color:#3b82f6;color:#1d4ed8;font-weight:500}
+.etbtn.pr{background:#2563eb;color:white;border-color:#2563eb}
+.etbtn.gr{background:#059669;color:white;border-color:#059669}
+.esep{width:1px;height:26px;background:#e5e7eb;margin:0 2px}
+#main{display:flex;flex:1;overflow:hidden}
+#canvas-area{flex:1;overflow:auto;background:#d1cfc8;display:flex;align-items:flex-start;justify-content:center;padding:24px}
+#pdf-wrapper{position:relative;display:inline-block;box-shadow:0 4px 20px rgba(0,0,0,.2);flex-shrink:0}
+#pdf-img{display:block}
+.fov{position:absolute;cursor:move;min-width:60px;min-height:22px}
+.fov.dm{border:1.5px solid #3b82f6;background:rgba(59,130,246,.07)}
+.fov:not(.dm){overflow:hidden}
+.flbl{position:absolute;top:-19px;right:0;font-size:10px;color:#1d4ed8;white-space:nowrap;background:white;padding:1px 5px;border-radius:3px;border:1px solid #93c5fd;pointer-events:none}
+.fdel{position:absolute;top:-19px;left:0;width:17px;height:17px;background:#dc2626;color:white;border:none;border-radius:3px;cursor:pointer;font-size:13px;line-height:17px;text-align:center;padding:0;font-family:inherit}
+.frsz{position:absolute;bottom:-4px;left:-4px;width:10px;height:10px;background:#3b82f6;border-radius:2px;cursor:nwse-resize}
+.fval{padding:0 4px;width:100%;direction:rtl;pointer-events:none;word-break:break-word;overflow:hidden;line-height:1.3;padding-top:2px}
+#sidebar{width:290px;border-right:1px solid #e5e7eb;background:white;display:flex;flex-direction:column;flex-shrink:0}
+.stabs{display:flex;border-bottom:1px solid #e5e7eb}
+.stab{flex:1;padding:10px 4px;font-size:12.5px;text-align:center;cursor:pointer;border:none;background:none;font-family:inherit;color:#6b7280;border-bottom:2px solid transparent}
+.stab.on{color:#2563eb;border-bottom-color:#2563eb;font-weight:500}
+.spanel{flex:1;overflow-y:auto;padding:12px;display:none}
+.spanel.on{display:block}
+.crow{margin-bottom:10px}
+.clbl{font-size:11px;color:#6b7280;margin-bottom:4px;font-weight:600}
+.cinp{width:100%;padding:7px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;font-family:inherit;color:#1a1a1a;direction:rtl}
+.cinp:focus{outline:none;border-color:#3b82f6}
+.fitem{display:flex;align-items:center;gap:7px;padding:7px;border:1px solid #e5e7eb;border-radius:6px;margin-bottom:5px;background:#fafafa;font-size:13px}
+.badge{font-size:10px;padding:2px 6px;border-radius:4px;font-weight:600}
+.bt{background:#dbeafe;color:#1e40af}.bn{background:#fef3c7;color:#92400e}
+.bd{background:#dcfce7;color:#166534}.btf{background:#f3e8ff;color:#7e22ce}
+.hint-box{font-size:12px;color:#6b7280;padding:8px 10px;background:#f9fafb;border-radius:7px;border:1px solid #e5e7eb;line-height:1.6;margin-bottom:10px}
+#pnav{background:white;border-top:1px solid #e5e7eb;padding:8px;display:flex;align-items:center;justify-content:center;gap:12px;font-size:13px;flex-shrink:0}
+
+/* ── Modals ── */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;align-items:center;justify-content:center}
+.modal-bg.on{display:flex}
+.modal{background:white;border-radius:12px;padding:22px;width:340px;direction:rtl;max-height:90vh;overflow-y:auto}
+.modal h3{font-size:15px;font-weight:600;margin-bottom:14px;color:#111}
+.progress-bar{height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden;margin-top:8px}
+.progress-fill{height:100%;background:#2563eb;border-radius:3px;transition:width .3s}
+
+/* ── Toast ── */
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(70px);background:#111827;color:white;padding:9px 18px;border-radius:8px;font-size:13px;transition:transform .28s;z-index:9999;pointer-events:none}
+#toast.on{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div class="screen on" id="sc-login">
+  <div class="card">
+    <div class="card-logo">
+      <div style="font-size:36px;margin-bottom:8px">🛡️</div>
+      <h1>لوحة إدارة النماذج</h1>
+      <p>للمسؤولين فقط</p>
+    </div>
+
+    <div id="panel-login">
+      <div class="inp-row">
+        <label class="inp-lbl">كلمة مرور الأدمن</label>
+        <input class="inp" id="login-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <div class="err-msg" id="login-err">كلمة المرور غلط</div>
+      <div class="divider"></div>
+      <button class="btn-full" onclick="doLogin()">دخول →</button>
+      <div class="hint" style="margin-top:10px;text-align:center">أول مرة؟ اضغط <a href="#" onclick="showSetupPanel()" style="color:#2563eb">إعداد النظام</a></div>
+    </div>
+
+    <div id="panel-setup" style="display:none">
+      <div class="inp-row">
+        <label class="inp-lbl">Supabase URL</label>
+        <input class="inp" id="cfg-url" placeholder="https://xxxx.supabase.co" dir="ltr">
+      </div>
+      <div class="inp-row">
+        <label class="inp-lbl">Anon Key <span style="color:#6b7280;font-weight:400">(من Legacy tab)</span></label>
+        <input class="inp" id="cfg-key" placeholder="eyJhbGciOiJIUzI1NiIs..." dir="ltr">
+      </div>
+      <div class="inp-row">
+        <label class="inp-lbl">Service Role Key <span style="color:#dc2626;font-weight:400">(سري)</span></label>
+        <input class="inp" id="cfg-svc" placeholder="eyJhbGciOiJIUzI1NiIs..." dir="ltr">
+        <div class="hint">بيتجاوز صلاحيات قاعدة البيانات — لا تشاركه مع أحد</div>
+      </div>
+      <div class="inp-row">
+        <label class="inp-lbl">كلمة مرور الأدمن</label>
+        <input class="inp" id="cfg-pass" type="password" placeholder="اختار كلمة مرور قوية">
+      </div>
+      <div class="divider"></div>
+      <button class="btn-full" onclick="doSetup()">💾 حفظ وبدء الإعداد</button>
+      <div style="margin-top:10px;text-align:center"><a href="#" onclick="showLoginPanel()" style="color:#6b7280;font-size:12px">← رجوع لتسجيل الدخول</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ HOME ══ -->
+<div class="screen" id="sc-home">
+  <div class="topbar">
+    <div class="topbar-logo">🛡️ إدارة <span>النماذج</span></div>
+    <button class="tbtn pr" onclick="startNewTemplate()">➕ نموذج جديد</button>
+    <div class="sep"></div>
+    <button class="tbtn" onclick="doLogout()">خروج ✕</button>
+  </div>
+  <div class="content">
+    <div class="section-title">النماذج المرفوعة</div>
+    <div class="section-sub">كل نموذج يظهر للمستخدمين بمجرد حفظ قالبه</div>
+    <div id="templates-grid" class="templates-grid">
+      <div class="loading"><div class="spinner"></div> جاري التحميل...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ EDITOR ══ -->
+<div class="screen" id="sc-editor">
+  <div id="editor-inner">
+    <div id="toolbar2">
+      <button class="etbtn" onclick="goHome()">← رجوع</button>
+      <div class="esep"></div>
+      <button class="etbtn on" id="btn-dm" onclick="setMode('d')">✏️ تصميم الحقول</button>
+      <button class="etbtn" id="btn-fm" onclick="setMode('f')">👁️ معاينة</button>
+      <div class="esep"></div>
+      <button class="etbtn pr" onclick="saveTemplate()">☁️ حفظ القالب</button>
+      <div style="flex:1"></div>
+      <span id="tpl-title" style="font-size:13px;color:#6b7280;font-weight:500"></span>
+    </div>
+    <div id="main">
+      <div id="canvas-area">
+        <div id="pdf-wrapper" onclick="onWrapClick(event)">
+          <img id="pdf-img" alt="">
+        </div>
+      </div>
+      <div id="sidebar">
+        <div class="stabs">
+          <button class="stab on" id="stab-f" onclick="stab('f')">الحقول</button>
+          <button class="stab" id="stab-s" onclick="stab('s')">إعدادات</button>
+        </div>
+        <div class="spanel on" id="sp-f">
+          <div class="hint-box">💡 اضغط على أي مكان في الـ PDF لإضافة حقل — اسحبه لتغيير موضعه</div>
+          <div id="fields-list"></div>
+        </div>
+        <div class="spanel" id="sp-s">
+          <div class="crow"><div class="clbl">حجم الخط الافتراضي</div><input type="number" class="cinp" id="s-fs" value="14" min="8" max="40"></div>
+          <div class="crow"><div class="clbl">لون النص الافتراضي</div><input type="color" class="cinp" id="s-col" value="#000000" style="height:38px;padding:4px"></div>
+          <div class="crow"><div class="clbl">محاذاة النص الافتراضية</div>
+            <select class="cinp" id="s-align"><option value="right">يمين</option><option value="center">وسط</option><option value="left">يسار</option></select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="pnav">
+      <button class="etbtn" id="btn-prev" onclick="goPage(-1)">◀ السابق</button>
+      <span id="pinfo">الصفحة 1 من 1</span>
+      <button class="etbtn" id="btn-next" onclick="goPage(1)">التالي ▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODALS ══ -->
+<div class="modal-bg" id="field-modal">
+  <div class="modal">
+    <h3>➕ إضافة حقل</h3>
+    <div class="crow"><div class="clbl">اسم الحقل *</div><input class="cinp" id="m-name" placeholder="مثال: اسم العميل" onkeydown="if(event.key==='Enter')confirmField()"></div>
+    <div class="crow"><div class="clbl">نوع الحقل</div>
+      <select class="cinp" id="m-type" onchange="toggleModalRows()">
+        <option value="text">نص</option>
+        <option value="number">رقم (مع تفقيط)</option>
+        <option value="date">تاريخ</option>
+        <option value="tafqeet">تفقيط (مرتبط برقم)</option>
+      </select>
+    </div>
+    <div class="crow" id="m-link-row" style="display:none"><div class="clbl">مرتبط بحقل الرقم</div><select class="cinp" id="m-link"></select></div>
+    <div class="crow" id="m-cur-row" style="display:none">
+      <div class="clbl">العملة</div>
+      <select class="cinp" id="m-cur">
+        <option value="">بدون عملة</option>
+        <option value="ريال سعودي">ريال سعودي</option>
+        <option value="دولار أمريكي">دولار أمريكي</option>
+        <option value="درهم إماراتي">درهم إماراتي</option>
+        <option value="دينار كويتي">دينار كويتي</option>
+        <option value="جنيه مصري">جنيه مصري</option>
+      </select>
+    </div>
+    <div class="crow"><div class="clbl">حجم الخط</div><input type="number" class="cinp" id="m-fs" value="14" min="8" max="40"></div>
+    <div class="crow"><div class="clbl">لون النص</div><input type="color" class="cinp" id="m-col" value="#000000" style="height:38px;padding:4px"></div>
+    <div class="crow"><div class="clbl">محاذاة النص</div>
+      <select class="cinp" id="m-align"><option value="right">يمين</option><option value="center">وسط</option><option value="left">يسار</option></select>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="etbtn pr" style="flex:1" onclick="confirmField()">✓ إضافة</button>
+      <button class="etbtn" onclick="document.getElementById('field-modal').classList.remove('on')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="new-tpl-modal">
+  <div class="modal">
+    <h3>📄 نموذج جديد</h3>
+    <div class="crow"><div class="clbl">اسم النموذج *</div><input class="cinp" id="nt-name" placeholder="مثال: فاتورة مبيعات"></div>
+    <div class="crow"><div class="clbl">ملف PDF *</div>
+      <input type="file" id="nt-file" accept=".pdf" style="width:100%;padding:8px;border:1px dashed #d1d5db;border-radius:6px;font-size:13px">
+    </div>
+    <div class="progress-bar" id="up-bar" style="display:none"><div class="progress-fill" id="up-fill" style="width:0%"></div></div>
+    <div id="up-status" style="font-size:12px;color:#6b7280;margin-top:6px"></div>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="etbtn pr" style="flex:1" onclick="uploadAndCreate()">رفع وإنشاء →</button>
+      <button class="etbtn" onclick="document.getElementById('new-tpl-modal').classList.remove('on')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+let sb=null, sbAdmin=null;
+let currentTplId=null;
+let fields=[], mode='d';
+let pdf=null, page=1, pages=1, imgW=0, imgH=0;
+let cx=0, cy=0, dox=0, doy=0;
+
+// ══ Screens ══
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');}
+function showSetupPanel(){document.getElementById('panel-login').style.display='none';document.getElementById('panel-setup').style.display='block';}
+function showLoginPanel(){document.getElementById('panel-setup').style.display='none';document.getElementById('panel-login').style.display='block';}
+
+// ══ Login ══
+function doLogin(){
+  const p=document.getElementById('login-pass').value;
+  const stored=localStorage.getItem('admin_pass');
+  if(!stored){showSetupPanel();return;}
+  if(p!==stored){document.getElementById('login-err').style.display='block';return;}
+  document.getElementById('login-err').style.display='none';
+  initClients();
+  showScreen('sc-home');
+  loadTemplates();
+}
+
+function doLogout(){
+  showScreen('sc-login');
+  document.getElementById('login-pass').value='';
+}
+
+async function doSetup(){
+  const url=document.getElementById('cfg-url').value.trim();
+  const key=document.getElementById('cfg-key').value.trim();
+  const svc=document.getElementById('cfg-svc').value.trim();
+  const pass=document.getElementById('cfg-pass').value.trim();
+  if(!url||!key||!pass){alert('أدخل جميع البيانات المطلوبة');return;}
+  try{
+    sb=window.supabase.createClient(url,key);
+    sbAdmin=svc?window.supabase.createClient(url,svc,{auth:{autoRefreshToken:false,persistSession:false}}):sb;
+    const {error}=await sb.from('templates').select('id').limit(1);
+    if(error)throw error;
+    localStorage.setItem('sb_url',url);
+    localStorage.setItem('sb_key',key);
+    if(svc)localStorage.setItem('sb_svc',svc);
+    localStorage.setItem('admin_pass',pass);
+    // push config to user page
+    localStorage.setItem('cfg_url',url);
+    localStorage.setItem('cfg_key',key);
+    showScreen('sc-home');
+    loadTemplates();
+    toast('تم الإعداد بنجاح ✓');
+  }catch(e){alert('فشل الاتصال: '+e.message);}
+}
+
+function initClients(){
+  const url=localStorage.getItem('sb_url'),key=localStorage.getItem('sb_key'),svc=localStorage.getItem('sb_svc');
+  if(!url||!key)return false;
+  sb=window.supabase.createClient(url,key);
+  sbAdmin=svc?window.supabase.createClient(url,svc,{auth:{autoRefreshToken:false,persistSession:false}}):sb;
+  return true;
+}
+
+// ══ Templates ══
+async function loadTemplates(){
+  const grid=document.getElementById('templates-grid');
+  grid.innerHTML='<div class="loading"><div class="spinner"></div> جاري التحميل...</div>';
+  const {data,error}=await sb.from('templates').select('*').order('created_at',{ascending:false});
+  if(error||!data?.length){
+    grid.innerHTML='<div class="empty-state"><div style="font-size:48px;margin-bottom:12px">📭</div><p>لا توجد نماذج — أضف نموذجاً جديداً</p></div>';
+    return;
+  }
+  grid.innerHTML=data.map(t=>`
+    <div class="tpl-card">
+      <div class="tpl-thumb">📄</div>
+      <div class="tpl-info">
+        <div class="tpl-name">${t.name}</div>
+        <div class="tpl-meta">${t.pdf_name} · ${new Date(t.created_at).toLocaleDateString('ar-SA')}</div>
+        <div class="tpl-actions">
+          <button class="tpl-btn tb-edit" onclick="editTemplate('${t.id}')">✏️ تعديل الحقول</button>
+          <button class="tpl-btn tb-del" onclick="deleteTemplate('${t.id}')">🗑️ حذف</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+async function deleteTemplate(id){
+  if(!confirm('حذف هذا النموذج نهائياً؟'))return;
+  await sbAdmin.from('templates').delete().eq('id',id);
+  toast('تم الحذف');
+  loadTemplates();
+}
+
+function goHome(){showScreen('sc-home');loadTemplates();}
+
+// ══ New Template ══
+function startNewTemplate(){
+  document.getElementById('nt-name').value='';
+  document.getElementById('nt-file').value='';
+  document.getElementById('up-status').textContent='';
+  document.getElementById('up-bar').style.display='none';
+  document.getElementById('new-tpl-modal').classList.add('on');
+}
+
+async function uploadAndCreate(){
+  const name=document.getElementById('nt-name').value.trim();
+  const file=document.getElementById('nt-file').files[0];
+  if(!name||!file){alert('أدخل الاسم واختر ملف PDF');return;}
+  const path=`pdfs/file_${Date.now()}.pdf`;
+  document.getElementById('up-bar').style.display='block';
+  document.getElementById('up-fill').style.width='30%';
+  document.getElementById('up-status').textContent='جاري الرفع...';
+  const {error:upErr}=await sbAdmin.storage.from('pdfs').upload(path,file,{cacheControl:'3600',upsert:false});
+  if(upErr){alert('خطأ في رفع الملف: '+upErr.message);return;}
+  document.getElementById('up-fill').style.width='70%';
+  const {data:ins,error:insErr}=await sbAdmin.from('templates').insert({name,pdf_name:file.name,pdf_path:path,fields:[]}).select().single();
+  if(insErr){alert('خطأ في الحفظ: '+insErr.message);return;}
+  document.getElementById('up-fill').style.width='100%';
+  document.getElementById('up-status').textContent='تم ✓';
+  document.getElementById('new-tpl-modal').classList.remove('on');
+  toast('تم الرفع — صمّم حقول النموذج');
+  await openTemplateById(ins);
+}
+
+// ══ Edit Template ══
+async function editTemplate(id){
+  const {data,error}=await sb.from('templates').select('*').eq('id',id).single();
+  if(error||!data){toast('خطأ');return;}
+  await openTemplateById(data);
+}
+
+async function openTemplateById(tpl){
+  currentTplId=tpl.id;
+  fields=tpl.fields||[];
+  document.getElementById('tpl-title').textContent=tpl.name;
+  const {data}=sb.storage.from('pdfs').getPublicUrl(tpl.pdf_path);
+  showScreen('sc-editor');
+  setMode('d');
+  await loadPDF(data.publicUrl);
+  renderFieldsList();
+}
+
+// ══ Save Template ══
+async function saveTemplate(){
+  const cleanFields=fields.map(f=>({...f,val:'',_raw:''}));
+  const {error}=await sbAdmin.from('templates').update({fields:cleanFields}).eq('id',currentTplId);
+  if(error){alert('خطأ في الحفظ: '+error.message);return;}
+  toast('تم حفظ القالب — متاح للمستخدمين ✓');
+}
+
+// ══ PDF ══
+async function loadPDF(url){
+  const buf=await (await fetch(url)).arrayBuffer();
+  pdf=await pdfjsLib.getDocument({data:buf}).promise;
+  pages=pdf.numPages; page=1;
+  await renderPage();
+}
+
+async function renderPage(){
+  const pg=await pdf.getPage(page);
+  const RS=2.5,DS=1.5,vp=pg.getViewport({scale:RS});
+  const oc=document.createElement('canvas');oc.width=vp.width;oc.height=vp.height;
+  await pg.render({canvasContext:oc.getContext('2d'),viewport:vp}).promise;
+  const blob=await new Promise(r=>oc.toBlob(r,'image/png'));
+  const url=URL.createObjectURL(blob);
+  const img=document.getElementById('pdf-img');
+  if(img._blobUrl)URL.revokeObjectURL(img._blobUrl);
+  img._blobUrl=url;
+  imgW=Math.round(vp.width/RS*DS); imgH=Math.round(vp.height/RS*DS);
+  img.src=url;
+  await new Promise(r=>{img.onload=r;img.onerror=r;});
+  img.style.width=imgW+'px'; img.style.height=imgH+'px';
+  const wr=document.getElementById('pdf-wrapper');
+  wr.style.width=imgW+'px'; wr.style.height=imgH+'px';
+  document.getElementById('pinfo').textContent=`الصفحة ${page} من ${pages}`;
+  document.getElementById('btn-prev').disabled=page<=1;
+  document.getElementById('btn-next').disabled=page>=pages;
+  renderOverlays();
+}
+async function goPage(d){const np=page+d;if(np>=1&&np<=pages){page=np;await renderPage();}}
+
+// ══ Mode ══
+function setMode(m){
+  mode=m;
+  document.getElementById('btn-dm').classList.toggle('on',m==='d');
+  document.getElementById('btn-fm').classList.toggle('on',m==='f');
+  document.getElementById('pdf-wrapper').style.cursor=m==='d'?'crosshair':'default';
+  renderOverlays();
+}
+
+// ══ Field Modal ══
+function onWrapClick(e){
+  if(mode!=='d')return;
+  if(e.target.closest&&e.target.closest('.fov'))return;
+  const r=document.getElementById('pdf-wrapper').getBoundingClientRect();
+  cx=e.clientX-r.left; cy=e.clientY-r.top;
+  document.getElementById('m-name').value='';
+  document.getElementById('m-type').value='text';
+  document.getElementById('m-fs').value=document.getElementById('s-fs').value||'14';
+  document.getElementById('m-col').value=document.getElementById('s-col').value||'#000000';
+  document.getElementById('m-align').value=document.getElementById('s-align').value||'right';
+  document.getElementById('m-cur').value='';
+  toggleModalRows();
+  const ls=document.getElementById('m-link');
+  ls.innerHTML='<option value="">اختر...</option>'+fields.filter(f=>f.type==='number').map(f=>`<option value="${f.id}">${f.name}</option>`).join('');
+  document.getElementById('field-modal').classList.add('on');
+  setTimeout(()=>document.getElementById('m-name').focus(),80);
+}
+
+function toggleModalRows(){
+  const t=document.getElementById('m-type').value;
+  document.getElementById('m-link-row').style.display=t==='tafqeet'?'block':'none';
+  document.getElementById('m-cur-row').style.display=t==='number'?'block':'none';
+}
+
+function confirmField(){
+  const name=document.getElementById('m-name').value.trim();
+  if(!name){alert('أدخل اسم الحقل');return;}
+  fields.push({
+    id:'f'+Date.now(),name,type:document.getElementById('m-type').value,
+    x:cx,y:cy,w:180,h:28,
+    fs:parseInt(document.getElementById('m-fs').value)||14,
+    col:document.getElementById('m-col').value,
+    align:document.getElementById('m-align').value,
+    linkTo:document.getElementById('m-link').value||null,
+    currency:document.getElementById('m-cur').value||'',
+    pg:page,val:''
+  });
+  document.getElementById('field-modal').classList.remove('on');
+  renderOverlays(); renderFieldsList();
+  toast('تم إضافة الحقل ✓');
+}
+
+// ══ Overlays ══
+function typeLabel(t){return{text:'نص',number:'رقم',date:'تاريخ',tafqeet:'تفقيط'}[t]||t;}
+function typeBadge(t){return{text:'bt',number:'bn',date:'bd',tafqeet:'btf'}[t]||'bt';}
+
+function renderOverlays(){
+  const wr=document.getElementById('pdf-wrapper');
+  wr.querySelectorAll('.fov').forEach(el=>el.remove());
+  fields.filter(f=>f.pg===page).forEach(f=>{
+    const d=document.createElement('div');
+    d.className='fov'+(mode==='d'?' dm':'');
+    d.id='ov_'+f.id;
+    d.style.cssText=`left:${f.x}px;top:${f.y}px;width:${f.w}px;height:${f.h}px;`;
+    if(mode==='d'){
+      const lbl=document.createElement('div');lbl.className='flbl';lbl.textContent=f.name;
+      const del=document.createElement('button');del.className='fdel';del.textContent='×';
+      del.onclick=e=>{e.stopPropagation();fields=fields.filter(x=>x.id!==f.id);renderOverlays();renderFieldsList();};
+      const rsz=document.createElement('div');rsz.className='frsz';rsz.onmousedown=e=>startResize(e,f.id);
+      d.appendChild(lbl);d.appendChild(del);d.appendChild(rsz);
+      d.onmousedown=e=>{if(e.target===d||e.target===lbl)startDrag(e,f.id);};
+    }
+    const v=document.createElement('div');v.className='fval';
+    v.style.cssText=`font-size:${f.fs}px;color:${f.col};text-align:${f.align};`;
+    v.textContent=mode==='d'?f.name:'';
+    d.appendChild(v); wr.appendChild(d);
+  });
+}
+
+function startDrag(e,id){
+  e.preventDefault();e.stopPropagation();
+  const f=fields.find(x=>x.id===id);
+  dox=e.clientX-f.x;doy=e.clientY-f.y;
+  function mv(ev){f.x=ev.clientX-dox;f.y=ev.clientY-doy;const el=document.getElementById('ov_'+id);if(el){el.style.left=f.x+'px';el.style.top=f.y+'px';}}
+  function up(){document.removeEventListener('mousemove',mv);document.removeEventListener('mouseup',up);}
+  document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up);
+}
+function startResize(e,id){
+  e.preventDefault();e.stopPropagation();
+  const f=fields.find(x=>x.id===id),sx=e.clientX,sy=e.clientY,sw=f.w,sh=f.h;
+  function mv(ev){f.w=Math.max(60,sw+(sx-ev.clientX));f.h=Math.max(18,sh+(ev.clientY-sy));const el=document.getElementById('ov_'+id);if(el){el.style.width=f.w+'px';el.style.height=f.h+'px';}}
+  function up(){document.removeEventListener('mousemove',mv);document.removeEventListener('mouseup',up);renderOverlays();}
+  document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up);
+}
+
+function renderFieldsList(){
+  const el=document.getElementById('fields-list');
+  if(!fields.length){el.innerHTML='<div style="text-align:center;color:#9ca3af;font-size:13px;padding:16px">لا توجد حقول — اضغط على الـ PDF لإضافة حقل</div>';return;}
+  el.innerHTML=fields.map(f=>`
+    <div class="fitem">
+      <span class="badge ${typeBadge(f.type)}">${typeLabel(f.type)}</span>
+      <span style="flex:1">${f.name}</span>
+      <span style="font-size:11px;color:#9ca3af">ص${f.pg}</span>
+      <button onclick="fields=fields.filter(x=>x.id!=='${f.id}');renderOverlays();renderFieldsList()" style="border:none;background:none;color:#dc2626;cursor:pointer;font-size:17px;line-height:1;padding:0 2px">×</button>
+    </div>`).join('');
+}
+
+function stab(id){['f','s'].forEach(t=>{document.getElementById('sp-'+t).classList.toggle('on',t===id);document.getElementById('stab-'+t).classList.toggle('on',t===id);});}
+
+// ══ Init ══
+let toastT;
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('on'),2800);}
+
+window.addEventListener('load',()=>{
+  const pass=localStorage.getItem('admin_pass');
+  if(!pass){ showSetupPanel(); return; }
+  // show login panel (already shown by default)
+});
+</script>
+</body>
+</html>
