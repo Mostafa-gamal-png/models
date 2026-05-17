@@ -139,9 +139,14 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#f4f2ef;color:#1a
       <input class="inp" id="cfg-url" placeholder="https://xxxx.supabase.co" dir="ltr">
     </div>
     <div class="inp-row">
-      <label class="inp-lbl">Supabase Anon Key <span style="color:#dc2626">(Legacy)</span></label>
+      <label class="inp-lbl">Supabase Anon Key <span style="color:#6b7280">(للمستخدمين)</span></label>
       <input class="inp" id="cfg-key" placeholder="eyJhbGciOiJIUzI1NiIs..." dir="ltr">
-      <div class="hint">⚠️ استخدم الـ <b>Legacy anon key</b> (يبدأ بـ eyJ) — مش الـ Publishable key</div>
+      <div class="hint">من تاب: Legacy anon, service_role API keys → الـ <b>anon</b> key</div>
+    </div>
+    <div class="inp-row">
+      <label class="inp-lbl">Service Role Key <span style="color:#dc2626">(للأدمن فقط)</span></label>
+      <input class="inp" id="cfg-svc" placeholder="eyJhbGciOiJIUzI1NiIs..." dir="ltr">
+      <div class="hint">من نفس التاب → الـ <b>service_role</b> key — لا تشاركه مع أحد</div>
     </div>
     <div class="inp-row">
       <label class="inp-lbl">كلمة مرور الأدمن</label>
@@ -325,32 +330,37 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#f4f2ef;color:#1a
 pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
 // ══ Config & Supabase ══
-let supabase=null;
+let supabase=null, supabaseAdmin=null;
 let isAdmin=false;
 let currentTplId=null, currentPdfPath=null;
+
+function initSupabase(url,key,svcKey){
+  supabase=window.supabase.createClient(url,key);
+  supabaseAdmin=svcKey
+    ? window.supabase.createClient(url,svcKey,{auth:{autoRefreshToken:false,persistSession:false}})
+    : supabase;
+}
+function db(){return supabaseAdmin||supabase;}
 
 async function saveConfig(){
   const url=document.getElementById('cfg-url').value.trim();
   const key=document.getElementById('cfg-key').value.trim();
+  const svc=document.getElementById('cfg-svc').value.trim();
   const pass=document.getElementById('cfg-pass').value.trim();
   if(!url||!key){alert('أدخل Supabase URL و Anon Key');return;}
   try{
-    initSupabase(url,key);
-    // test connection
+    initSupabase(url,key,svc);
     const {error}=await supabase.from('templates').select('id').limit(1);
     if(error)throw error;
     localStorage.setItem('sb_url',url);
     localStorage.setItem('sb_key',key);
+    if(svc)localStorage.setItem('sb_svc',svc);
     if(pass)localStorage.setItem('admin_pass',pass);
     showScreen('sc-home');
     loadTemplates();
   }catch(e){
-    alert('❌ فشل الاتصال بـ Supabase:\n'+e.message+'\n\nتأكد من:\n١. الـ URL صح\n٢. استخدم Legacy anon key (يبدأ بـ eyJ)\n٣. أنشأت الجدول والـ Storage bucket');
+    alert('❌ فشل الاتصال:\n'+e.message);
   }
-}
-
-function initSupabase(url,key){
-  supabase=window.supabase.createClient(url,key);
 }
 
 function showScreen(id){
@@ -419,7 +429,7 @@ async function loadTemplates(){
 
 async function deleteTemplate(id){
   if(!confirm('حذف هذا النموذج نهائياً؟'))return;
-  await supabase.from('templates').delete().eq('id',id);
+  await db().from('templates').delete().eq('id',id);
   toast('تم الحذف');
   loadTemplates();
 }
@@ -446,10 +456,10 @@ async function uploadAndCreate(){
   document.getElementById('upload-progress-bar').style.display='block';
   document.getElementById('upload-status').textContent='جاري الرفع...';
   document.getElementById('upload-progress-fill').style.width='30%';
-  const {error:upErr}=await supabase.storage.from('pdfs').upload(path,file,{cacheControl:'3600',upsert:false});
+  const {error:upErr}=await db().storage.from('pdfs').upload(path,file,{cacheControl:'3600',upsert:false});
   if(upErr){alert('خطأ في رفع الملف: '+upErr.message);return;}
   document.getElementById('upload-progress-fill').style.width='70%';
-  const {data:inserted,error:insErr}=await supabase.from('templates').insert({name,pdf_name:file.name,pdf_path:path,fields:[]}).select().single();
+  const {data:inserted,error:insErr}=await db().from('templates').insert({name,pdf_name:file.name,pdf_path:path,fields:[]}).select().single();
   if(insErr){alert('خطأ في الحفظ: '+insErr.message);return;}
   document.getElementById('upload-progress-fill').style.width='100%';
   document.getElementById('upload-status').textContent='تم الرفع ✓';
@@ -706,9 +716,9 @@ async function doSaveTemplate(){
   const cleanFields=fields.map(f=>({...f,val:'',_raw:''}));
   let result;
   if(currentTplId){
-    result=await supabase.from('templates').update({name,fields:cleanFields}).eq('id',currentTplId);
+    result=await db().from('templates').update({name,fields:cleanFields}).eq('id',currentTplId);
   } else {
-    result=await supabase.from('templates').insert({name,pdf_name:'',pdf_path:currentPdfPath||'',fields:cleanFields});
+    result=await db().from('templates').insert({name,pdf_name:'',pdf_path:currentPdfPath||'',fields:cleanFields});
   }
   if(result.error){alert('خطأ في الحفظ: '+result.error.message);return;}
   document.getElementById('save-tpl-modal').classList.remove('on');
@@ -750,8 +760,8 @@ function toast(msg){const el=document.getElementById('toast');el.textContent=msg
 
 // ══ Init ══
 window.addEventListener('load',()=>{
-  const url=localStorage.getItem('sb_url'),key=localStorage.getItem('sb_key');
-  if(url&&key){initSupabase(url,key);showScreen('sc-home');loadTemplates();}
+  const url=localStorage.getItem('sb_url'),key=localStorage.getItem('sb_key'),svc=localStorage.getItem('sb_svc');
+  if(url&&key){initSupabase(url,key,svc);showScreen('sc-home');loadTemplates();}
   else{showScreen('sc-setup');}
 });
 </script>
