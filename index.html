@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>نظام النماذج الذكي</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#f4f2ef;color:#1a1a1a;direction:rtl}
@@ -139,8 +139,9 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#f4f2ef;color:#1a
       <input class="inp" id="cfg-url" placeholder="https://xxxx.supabase.co" dir="ltr">
     </div>
     <div class="inp-row">
-      <label class="inp-lbl">Supabase Anon Key</label>
+      <label class="inp-lbl">Supabase Anon Key <span style="color:#dc2626">(Legacy)</span></label>
       <input class="inp" id="cfg-key" placeholder="eyJhbGciOiJIUzI1NiIs..." dir="ltr">
+      <div class="hint">⚠️ استخدم الـ <b>Legacy anon key</b> (يبدأ بـ eyJ) — مش الـ Publishable key</div>
     </div>
     <div class="inp-row">
       <label class="inp-lbl">كلمة مرور الأدمن</label>
@@ -328,17 +329,24 @@ let supabase=null;
 let isAdmin=false;
 let currentTplId=null, currentPdfPath=null;
 
-function saveConfig(){
+async function saveConfig(){
   const url=document.getElementById('cfg-url').value.trim();
   const key=document.getElementById('cfg-key').value.trim();
   const pass=document.getElementById('cfg-pass').value.trim();
   if(!url||!key){alert('أدخل Supabase URL و Anon Key');return;}
-  localStorage.setItem('sb_url',url);
-  localStorage.setItem('sb_key',key);
-  if(pass)localStorage.setItem('admin_pass',pass);
-  initSupabase(url,key);
-  showScreen('sc-home');
-  loadTemplates();
+  try{
+    initSupabase(url,key);
+    // test connection
+    const {error}=await supabase.from('templates').select('id').limit(1);
+    if(error)throw error;
+    localStorage.setItem('sb_url',url);
+    localStorage.setItem('sb_key',key);
+    if(pass)localStorage.setItem('admin_pass',pass);
+    showScreen('sc-home');
+    loadTemplates();
+  }catch(e){
+    alert('❌ فشل الاتصال بـ Supabase:\n'+e.message+'\n\nتأكد من:\n١. الـ URL صح\n٢. استخدم Legacy anon key (يبدأ بـ eyJ)\n٣. أنشأت الجدول والـ Storage bucket');
+  }
 }
 
 function initSupabase(url,key){
@@ -433,7 +441,8 @@ async function uploadAndCreate(){
   if(!name){alert('أدخل اسم النموذج');return;}
   if(!fileInp.files[0]){alert('اختر ملف PDF');return;}
   const file=fileInp.files[0];
-  const path=`pdfs/${Date.now()}_${file.name.replace(/\s/g,'_')}`;
+  const safeName='file_'+Date.now()+'.pdf';
+  const path=`pdfs/${safeName}`;
   document.getElementById('upload-progress-bar').style.display='block';
   document.getElementById('upload-status').textContent='جاري الرفع...';
   document.getElementById('upload-progress-fill').style.width='30%';
