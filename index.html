@@ -32,7 +32,15 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#f4f2ef;color:#1a
 .spinner{width:20px;height:20px;border:2px solid #e5e7eb;border-top-color:#3b82f6;border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .empty-state{text-align:center;padding:60px 20px;color:#9ca3af}
-.empty-state .icon{font-size:48px;margin-bottom:12px}
+.folders-bar{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.folder-chip{padding:6px 14px;border-radius:20px;border:1px solid #e5e7eb;background:white;cursor:pointer;font-size:13px;font-family:inherit;color:#374151;transition:all .15s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.folder-chip:hover{border-color:#3b82f6;color:#1d4ed8}
+.folder-chip.on{background:#eff6ff;border-color:#3b82f6;color:#1d4ed8;font-weight:500}
+.folder-count{background:#e5e7eb;border-radius:10px;padding:1px 7px;font-size:11px;color:#6b7280}
+.folder-chip.on .folder-count{background:#dbeafe;color:#1d4ed8}
+.folder-section{margin-bottom:28px}
+.folder-header{font-size:15px;font-weight:700;color:#374151;margin-bottom:12px;display:flex;align-items:center;gap:8px;padding-bottom:8px;border-bottom:1px solid #e5e7eb}
+.folder-header-count{font-size:12px;color:#9ca3af;font-weight:400}
 #sc-editor{height:100vh;overflow:hidden}
 #editor-inner{display:flex;flex-direction:column;height:100vh}
 #toolbar2{background:white;border-bottom:1px solid #e5e7eb;padding:8px 14px;display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap}
@@ -79,14 +87,13 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#f4f2ef;color:#1a
     <div class="topbar-logo">نماذج <span>الشركة</span></div>
   </div>
   <div class="content">
-    <div class="section-title">النماذج المتاحة</div>
-    <div class="section-sub">اختر نموذجاً لملء بياناته وطباعته</div>
-    <div style="margin-bottom:16px;position:relative">
-      <input type="text" id="search-inp" placeholder="🔍  ابحث عن نموذج..." oninput="filterTemplates(this.value)"
+    <div style="margin-bottom:16px">
+      <input type="text" id="search-inp" placeholder="🔍  ابحث عن نموذج..." oninput="renderHome()"
         style="width:100%;max-width:400px;padding:10px 14px;border:1px solid #e5e7eb;border-radius:10px;font-size:14px;font-family:inherit;background:white;direction:rtl;outline:none;transition:border-color .15s"
         onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#e5e7eb'">
     </div>
-    <div id="templates-grid" class="templates-grid">
+    <div class="folders-bar" id="folders-bar"></div>
+    <div id="templates-container">
       <div class="loading"><div class="spinner"></div> جاري التحميل...</div>
     </div>
   </div>
@@ -135,35 +142,70 @@ pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/p
 let sb = null;
 let pdf=null, page=1, pages=1, imgW=0, imgH=0;
 let fields=[];
-let allTemplates=[];
+let allTemplates=[], allFolders=[], activeFolder='ALL';
 
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
   document.getElementById(id).classList.add('on');
 }
 
-function filterTemplates(q){
-  const filtered = q.trim()
-    ? allTemplates.filter(t=>t.name.includes(q.trim()))
-    : allTemplates;
-  renderGrid(filtered, q.trim());
+// ══ Folder filter ══
+function setFolder(name){activeFolder=name;renderFoldersBar();renderHome();}
+
+function renderFoldersBar(){
+  const bar=document.getElementById('folders-bar');
+  if(!allFolders.length&&!allTemplates.some(t=>!t.folder)){bar.innerHTML='';return;}
+  bar.innerHTML=`
+    <button class="folder-chip ${activeFolder==='ALL'?'on':''}" onclick="setFolder('ALL')">
+      📋 الكل <span class="folder-count">${allTemplates.length}</span>
+    </button>
+    ${allFolders.map(f=>`
+      <button class="folder-chip ${activeFolder===f.name?'on':''}" onclick="setFolder('${f.name}')">
+        📁 ${f.name} <span class="folder-count">${allTemplates.filter(t=>t.folder===f.name).length}</span>
+      </button>`).join('')}
+    ${allTemplates.some(t=>!t.folder)?`
+      <button class="folder-chip ${activeFolder===''?'on':''}" onclick="setFolder('')">
+        📌 أخرى <span class="folder-count">${allTemplates.filter(t=>!t.folder).length}</span>
+      </button>`:''}`;
 }
 
-function renderGrid(data, q=''){
-  const grid=document.getElementById('templates-grid');
-  if(!data.length){
-    grid.innerHTML=`<div class="empty-state"><div class="icon">🔍</div><p>${q?'لا توجد نماذج بهذا الاسم':'لا توجد نماذج متاحة بعد'}</p></div>`;
+function renderHome(){
+  const q=(document.getElementById('search-inp')?.value||'').trim();
+  let list = activeFolder==='ALL' ? allTemplates : allTemplates.filter(t=>(t.folder||'')===(activeFolder));
+  if(q) list=list.filter(t=>t.name.includes(q));
+  const con=document.getElementById('templates-container');
+  if(!list.length){
+    con.innerHTML=`<div class="empty-state"><div class="icon">${q?'🔍':'📭'}</div><p>${q?'لا توجد نتائج':'لا توجد نماذج في هذا المجلد'}</p></div>`;
     return;
   }
-  grid.innerHTML=data.map(t=>`
-    <div class="tpl-card" onclick="openTemplate('${t.id}')">
-      <div class="tpl-thumb">📄</div>
-      <div class="tpl-info">
-        <div class="tpl-name">${t.name}</div>
-        <div class="tpl-meta">${new Date(t.created_at).toLocaleDateString('ar-SA')}</div>
-        <button class="tbtn pr" style="width:100%;justify-content:center;margin-top:6px">فتح وملء ←</button>
-      </div>
-    </div>`).join('');
+  // if ALL and no search → group by folder
+  if(activeFolder==='ALL'&&!q){
+    const groups={};
+    list.forEach(t=>{const k=t.folder||'__none__';(groups[k]=groups[k]||[]).push(t);});
+    // sort: named folders first, then __none__
+    const sorted=Object.entries(groups).sort(([a],[b])=>a==='__none__'?1:b==='__none__'?-1:a.localeCompare(b,'ar'));
+    con.innerHTML=sorted.map(([k,items])=>`
+      <div class="folder-section">
+        <div class="folder-header">
+          ${k==='__none__'?'📌 نماذج أخرى':'📁 '+k}
+          <span class="folder-header-count">${items.length} نموذج</span>
+        </div>
+        <div class="templates-grid">${items.map(tplCard).join('')}</div>
+      </div>`).join('');
+  } else {
+    con.innerHTML='<div class="templates-grid">'+list.map(tplCard).join('')+'</div>';
+  }
+}
+
+function tplCard(t){
+  return`<div class="tpl-card" onclick="openTemplate('${t.id}')">
+    <div class="tpl-thumb">📄</div>
+    <div class="tpl-info">
+      <div class="tpl-name">${t.name}</div>
+      <div class="tpl-meta">${new Date(t.created_at).toLocaleDateString('ar-SA')}</div>
+      <button class="tbtn pr" style="width:100%;justify-content:center;margin-top:6px">فتح وملء ←</button>
+    </div>
+  </div>`;
 }
 
 // ══ Init ══
@@ -176,16 +218,16 @@ window.addEventListener('load', async ()=>{
 
 // ══ Templates ══
 async function loadTemplates(){
-  const grid=document.getElementById('templates-grid');
-  grid.innerHTML='<div class="loading"><div class="spinner"></div> جاري التحميل...</div>';
-  const {data,error}=await sb.from('templates').select('*').order('created_at',{ascending:false});
-  if(error||!data?.length){
-    allTemplates=[];
-    grid.innerHTML='<div class="empty-state"><div class="icon">📭</div><p>لا توجد نماذج متاحة بعد</p></div>';
-    return;
-  }
-  allTemplates=data;
-  renderGrid(data);
+  const con=document.getElementById('templates-container');
+  con.innerHTML='<div class="loading"><div class="spinner"></div> جاري التحميل...</div>';
+  const [{data:td},{data:fd}]=await Promise.all([
+    sb.from('templates').select('*').order('created_at',{ascending:false}),
+    sb.from('folders').select('*').order('name')
+  ]);
+  allTemplates=td||[];
+  allFolders=fd||[];
+  renderFoldersBar();
+  renderHome();
 }
 
 async function openTemplate(id){
